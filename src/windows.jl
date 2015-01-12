@@ -1,7 +1,6 @@
 ## Windowing
 ## =========
 
-
 # A window is a named window into an executable piece of code
 macro window(name, data...)
   # Hacking with strings because I don't know how to quote symbols
@@ -10,7 +9,7 @@ macro window(name, data...)
   filters = getfilters(symbol($namestring))
   if !isempty(filters)
     for filter in filters
-      f.enabled && filter.f($(data...))
+      filter.enabled && filter.f($(esc(data...)))
     end
   end
   end
@@ -18,7 +17,7 @@ end
 
 # A filter is a named function
 # It has a name so that we can remove it if desired easily
-immutable Filter
+type Filter
   name::Symbol
   f::Function
   enabled::Bool
@@ -43,7 +42,23 @@ register!(window::Symbol, filtername::Symbol, f::Function) =
 # What filters are registed to window name
 getfilters(name::Symbol) = haskey(window_to_filters, name) ? window_to_filters[name] : Set{Filter}()
 
-# Clearing is permanent
+## Enabling/Disabling Filters
+## ==========================
+
+#Clearing is permanent
 clear_all_filters!() = window_to_filters = Dict{Symbol, Set{Filter}}()
-disable_filter!(name::Symbol)
+
+function disable_filter!(watch_name::Symbol, filter_name::Symbol)
+  for f in window_to_filters[watch_name]
+    if f.name == filter_name f.enabled = false end
+  end
+end
+
+function enable_filter!(watch_name::Symbol, filter_name::Symbol)
+  for f in window_to_filters[watch_name]
+    if f.name == filter_name f.enabled = true end
+  end
+end
+
+enable_all_filters!() = for f in values(window_to_filters) f.enabled = true end
 disable_all_filters!() = for f in values(window_to_filters) f.enabled = false end

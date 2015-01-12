@@ -13,3 +13,5 @@ Pkg.clone("https://github.com/zenna/Window.jl.git")
 ```
 
 # Usage
+
+It's very simple, checkout the simple.jl test
