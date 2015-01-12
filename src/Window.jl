@@ -1,5 +1,14 @@
 module Window
 
-# package code goes here
+import Base.isequal
 
-end # module
+export
+  @window,
+
+  getfilters,
+  clear_all_filters!,
+  disable_filter!,
+  disable_all_filters!,
+
+include("windows.jl")
+end
