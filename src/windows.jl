@@ -2,16 +2,12 @@
 ## =========
 
 # A window is a named window into an executable piece of code
-macro window(name, data...)
-  # Hacking with strings because I don't know how to quote symbols
-  namestring = string(name)
-  quote
-  filters = getfilters(symbol($namestring))
+function window(name::Symbol, data...)
+  filters = getfilters(name)
   if !isempty(filters)
     for filter in filters
-      filter.enabled && filter.f($(esc(data...)))
+      filter.enabled && filter.f(data...)
     end
-  end
   end
 end
 
@@ -60,5 +56,18 @@ function enable_filter!(watch_name::Symbol, filter_name::Symbol)
   end
 end
 
-enable_all_filters!() = for f in values(window_to_filters) f.enabled = true end
-disable_all_filters!() = for f in values(window_to_filters) f.enabled = false end
+function enable_all_filters!()
+  for fset in values(window_to_filters)
+    for f in fset
+      f.enabled = true
+    end
+  end
+end
+
+function disable_all_filters!()
+  for fset in values(window_to_filters)
+    for f in fset
+      f.enabled = false
+    end
+  end
+end

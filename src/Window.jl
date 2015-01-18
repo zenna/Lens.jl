@@ -3,7 +3,7 @@ module Window
 import Base.isequal
 
 export
-  @window,
+  window,
 
   register!,
   getfilters,
