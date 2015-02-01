@@ -1,9 +1,17 @@
 module Window
 
 import Base.isequal
+using DataStructures
+using DataFrames
 
 export
+  Benchmark,
+  Algorithm,
   window,
+  benchmarks,
+  register_benchmarks!,
+  disable_benchmarks!,
+  disable_benchmarks,
 
   register!,
   getfilters,
@@ -12,4 +20,6 @@ export
   disable_all_filters!
 
 include("windows.jl")
+include("benchmark.jl")
+
 end

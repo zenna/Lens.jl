@@ -20,6 +20,11 @@ type Filter
 end
 
 # Two filters are considered equal if they have the same name
+import Base.isequal
+import Base.hash
+
+hash(a::Filter) = hash(a.name)
+# ==(a::Filter,b::Filter) = a.name == b.name
 isequal(a::Filter, b::Filter) = a.name == b.name
 
 # global mutable directory connecting windowes to filters
