@@ -9,6 +9,7 @@ export
   Algorithm,
   window,
   benchmarks,
+  quickbench,
   register_benchmarks!,
   disable_benchmarks!,
   disable_benchmarks,
