@@ -7,16 +7,15 @@ benchmarks = Dict{Any, Vector{Any}}()
 function register_benchmarks!(captures::Vector{Symbol})
   for capture in captures
     let capture = capture
-      register!(capture, :benchmark,
-                i->begin
-                    global benchmarks
-#                     @show capture
-                    if haskey(benchmarks,capture)
-                      push!(benchmarks[capture], i)
-                    else
-                      benchmarks[capture] = [i]
-                    end
-                  end)
+      register!(:benchmark,capture) do i
+        global benchmarks
+  #                     @show capture
+        if haskey(benchmarks,capture)
+          push!(benchmarks[capture], i)
+        else
+          benchmarks[capture] = [i]
+        end
+      end
     end
   end
 end
@@ -29,18 +28,32 @@ function disable_benchmarks!(captures::Vector{Symbol})
   end
 end
 
-# Do a quick and dirty bechmark, captures captures and returns result too
-function quickbench(f::Function, captures::Vector{Symbol})
-  Window.clear_benchmarks!()
+function setup!(captures::Vector{Symbol})
+  clear_benchmarks!()
   global benchmarks
-  Window.register_benchmarks!(captures)
-  value, Δt, Δb = @timed(f())
-  window(:total_time, Δt)
-  # cleanup
-  Window.disable_benchmarks!(captures)
-  res = deepcopy(Window.benchmarks)
+  register_benchmarks!(captures)
+end
+
+function cleanup!()
+  disable_benchmarks!(captures)
+  res = deepcopy(benchmarks)
   clear_benchmarks!()
   value, res
+end
+
+# Do a quick and dirty bechmark, captures captures and returns result too
+function quickbench(captures::Vector{Symbol}, f::Function, args...)
+  setup!(captures)
+  value, Δt, Δb = @timed(f(args...))
+  window(:total_time, Δt)
+  cleanup!(captures)
+end
+
+macro quickbench(e)
+  @q
+  setup!()
+  e
+  cleanup()!
 end
 
 # Run all the benchmarks

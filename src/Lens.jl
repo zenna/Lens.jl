@@ -1,4 +1,4 @@
-module Window
+module Lens
 
 import Base.isequal
 using DataStructures
@@ -7,7 +7,7 @@ using DataFrames
 export
   Benchmark,
   Algorithm,
-  window,
+  lens,
   benchmarks,
   quickbench,
   register_benchmarks!,
@@ -20,7 +20,7 @@ export
   disable_filter!,
   disable_all_filters!
 
-include("windows.jl")
+include("lens.jl")
 include("benchmark.jl")
 
 end

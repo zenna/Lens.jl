@@ -1,8 +1,8 @@
-## Windowing
+## lensing
 ## =========
 
-# A window is a named window into an executable piece of code
-function window(name::Symbol, data...)
+# A lens is a named lens into an executable piece of code
+function lens(name::Symbol, data...)
   filters = getfilters(name)
   if !isempty(filters)
     for filter in filters
@@ -27,42 +27,42 @@ hash(a::Filter) = hash(a.name)
 # ==(a::Filter,b::Filter) = a.name == b.name
 isequal(a::Filter, b::Filter) = a.name == b.name
 
-# global mutable directory connecting windowes to filters
-window_to_filters = Dict{Symbol, Set{Filter}}()
+# global mutable directory connecting lenses to filters
+lens_to_filters = Dict{Symbol, Set{Filter}}()
 
-# Register a window to a filter.
-function register!(window::Symbol, f::Filter)
+# Register a lens to a filter.
+function register!(lens::Symbol, f::Filter)
   # DefaultDict: add filter to list or create singleton filter vec
-  haskey(window_to_filters, window) ? push!(window_to_filters[window],f) :
-                                    window_to_filters[window] = Set([f])
+  haskey(lens_to_filters, lens) ? push!(lens_to_filters[lens],f) :
+                                    lens_to_filters[lens] = Set([f])
 end
 
-register!(window::Symbol, filtername::Symbol, f::Function) =
-  register!(window, Filter(filtername, f, true))
+register!(f::Function, filtername::Symbol, lens::Symbol) =
+  register!(f, Filter(filtername, f, true),lens)
 
-# What filters are registed to window name
-getfilters(name::Symbol) = haskey(window_to_filters, name) ? window_to_filters[name] : Set{Filter}()
+# What filters are registed to lens name
+getfilters(name::Symbol) = haskey(lens_to_filters, name) ? lens_to_filters[name] : Set{Filter}()
 
 ## Enabling/Disabling Filters
 ## ==========================
 
 #Clearing is permanent
-clear_all_filters!() = window_to_filters = Dict{Symbol, Set{Filter}}()
+clear_all_filters!() = lens_to_filters = Dict{Symbol, Set{Filter}}()
 
 function disable_filter!(watch_name::Symbol, filter_name::Symbol)
-  for f in window_to_filters[watch_name]
+  for f in lens_to_filters[watch_name]
     if f.name == filter_name f.enabled = false end
   end
 end
 
 function enable_filter!(watch_name::Symbol, filter_name::Symbol)
-  for f in window_to_filters[watch_name]
+  for f in lens_to_filters[watch_name]
     if f.name == filter_name f.enabled = true end
   end
 end
 
 function enable_all_filters!()
-  for fset in values(window_to_filters)
+  for fset in values(lens_to_filters)
     for f in fset
       f.enabled = true
     end
@@ -70,7 +70,7 @@ function enable_all_filters!()
 end
 
 function disable_all_filters!()
-  for fset in values(window_to_filters)
+  for fset in values(lens_to_filters)
     for f in fset
       f.enabled = false
     end
