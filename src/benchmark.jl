@@ -49,12 +49,12 @@ function quickbench(captures::Vector{Symbol}, f::Function, args...)
   cleanup!(captures)
 end
 
-macro quickbench(e)
-  @q
-  setup!()
-  e
-  cleanup()!
-end
+# macro quickbench(e)
+#   @q
+#   setup!()
+#   e
+#   cleanup()!
+# end
 
 # Run all the benchmarks
 # function runbenchmarks(torun::Vector{Algorithm, Benchmark})

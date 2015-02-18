@@ -1,8 +1,6 @@
 module Lens
 
-import Base.isequal
-using DataStructures
-using DataFrames
+import Base: isequal, hash
 
 export
   Benchmark,
@@ -17,10 +15,12 @@ export
   register!,
   getfilters,
   clear_all_filters!,
+  enable_all_filters!,
+  enable_filter!,
   disable_filter!,
   disable_all_filters!
 
-include("lens.jl")
+include("filter.jl")
 include("benchmark.jl")
 
 end

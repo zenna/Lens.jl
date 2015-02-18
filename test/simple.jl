@@ -1,14 +1,14 @@
-using Window
+using Lens
 using Base.Test
 
 function simpletest()
   a = rand(10)
   b = rand(10)
-  window(:after_rand,a)
+  lens(:after_rand,a)
 end
 
 clear_all_filters!()
-register!(:after_rand, :justshow, i->@show @test length(i) == 10)
+register!(i->length(i) == 10, :after_rand, :justshow)
 simpletest()
 enable_all_filters!()
 disable_all_filters!()
