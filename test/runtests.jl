@@ -1,4 +1,4 @@
-tests = ["simple"]
+tests = ["benchmark","filter"]
 
 println("Running tests:")
 

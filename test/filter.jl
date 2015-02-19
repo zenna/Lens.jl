@@ -10,7 +10,7 @@ function simpletest1()
   lens(:after_rands1;a=a,b=b)
 end
 
-gfunc(;a=nothing, b=nothing) = @test sum(a) + sum(b) == 20
+gfunc(m) = @test sum(m[:a]) + sum(m[:b]) == 20
 register!(:after_rands1, Filter(:gfunc, gfunc, true, true))
 @test nfilters() == 1
 enable_all_filters!()
@@ -22,7 +22,6 @@ function simpletest2()
   b = 10
   lens(:after_rands2,a,b)
 end
-
 
 register!(:gunit, :after_rands2, false) do x,y
   @test x + y == 20

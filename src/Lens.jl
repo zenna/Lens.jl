@@ -6,6 +6,7 @@ export
   Benchmark,
   Algorithm,
   Filter,
+  Capture,
   lens,
   benchmarks,
   quickbench,
