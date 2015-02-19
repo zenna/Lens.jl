@@ -30,5 +30,7 @@ export
 
 include("filter.jl")
 include("benchmark.jl")
+include("run.jl")
+include("std.jl")
 
 end
