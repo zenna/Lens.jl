@@ -1,6 +1,9 @@
 # A Lens into the soul of your program
 
-Lens.jl is a simple Julia library to introspect on the runtime behaviour of your programs, with minimal interference with the program itself.
+Lens.jl is a simple Julia library to introspect on the runtime behaviour of your programs, with minimal interference with the program itself.  It is useful when
+
+- You want to profile your program, but by profiling you are interested in more than just time spent, you want to inspect arbitrary statistics of arbitrary values the program.
+- You have multiple solutions to a prolem and you want to systematically compare them
 
 [![Build Status](https://travis-ci.org/zenna/Lens.jl.svg?branch=master)](https://travis-ci.org/zenna/Lens.jl)
 
@@ -14,20 +17,21 @@ Pkg.clone("https://github.com/zenna/Lens.jl.git")
 
 # Usage
 
-Perhaps the most efficient way to understand hoe Lens.jl works is to look at the tests.
-Lens.jl is a library to help inspect and compare runtime properties of Julia programs.
+Perhaps the most efficient way to understand how Lens.jl works is to look at the tests.
+
 
 ## Lens
 Suppose you have a function:
 
-``
+```julia
 function f()
   X = rand(1000)
   adad
 ```
 
 Lens can be used in one of two ways
-```
+
+```julia
 lens(:lensname, x, y)
 ```
 
@@ -40,7 +44,7 @@ Lenses themselves do not contain any information about the filters, the filters 
 
 The filter:
 
-```
+```julia
 fl = Filter(:print, x->print(x...),true,false)
 ```
 
@@ -48,9 +52,9 @@ creates a Filter which takes arbitrary input and prints it.  The arguments are 1
 
 ```
 
-We connect the filter to the lens with
+We connect the filter to the lens with:
 
-```
+```julia
 register!(:lensname, fl)
 ```
 
@@ -63,4 +67,4 @@ f()
 
 A `Capture` is a s
 
-It's very simple, checkout the tests
+## Benchmarks
