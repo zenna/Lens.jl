@@ -1,6 +1,5 @@
 abstract Problem ## A computational problem
 abstract Algorithm # An algorithm is a procedure to solve it
-typealias Capture Union(Symbol, (Symbol, Symbol))
 # We shall call a pair of them a run
 typealias Run (Algorithm, Problem)
 

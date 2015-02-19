@@ -1,4 +1,6 @@
 # global mutable directory connecting benchmark names with dataframes
+typealias Capture Union(Symbol, (Symbol, Symbol))
+
 clear_benchmarks!() = global benchmarks = Dict{Capture, Vector{Any}}()
 clear_benchmarks!()
 
