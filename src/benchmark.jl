@@ -1,57 +1,34 @@
 # global mutable directory connecting benchmark names with dataframes
-typealias Capture Union(Symbol, (Symbol, Symbol))
+typealias Capture (Symbol, Vector{Symbol})
 
-clear_benchmarks!() = global benchmarks = Dict{Capture, Vector{Any}}()
+clear_benchmarks!() = global benchmarks = Dict{Symbol, Vector{Any}}()
 clear_benchmarks!()
 
-function capturebench(capture::Symbol, data)
+# Convert a dict into an other one with only those keys in ks
+extract{K,V}(d::Dict{K,V},ks::Vector{K}) = Dict{K,V}([k=>d[k] for k in ks])
+
+function capturebench(vars::Vector{Symbol}, data::Data)
   global benchmarks
-  if haskey(benchmarks,capture)
-    push!(benchmarks[capture], data)
+  sliceddata = Data(data.procid, data.lensname, extract(data.data, vars))
+  if haskey(benchmarks,sliceddata.lensname)
+    push!(benchmarks[sliceddata.lensname], sliceddata)
   else
-    benchmarks[capture] = [data]
+    benchmarks[sliceddata.lensname] = [sliceddata]
   end
-end
-
-function capturebench(capture::(Symbol,Symbol), data)
-  global benchmarks
-  joined_capture = symbol("$(capture[1])_$(capture[2])")
-  if haskey(benchmarks,joined_capture)
-    push!(benchmarks[joined_capture], data[capture[2]])
-  else
-    benchmarks[joined_capture] = [data[capture[2]]]
-  end
-end
-
-function register_benchmark!(c::Symbol)
-  fl = Filter(gensym("benchmark"), data->capturebench(c,data), true, false)
-  register!(c, fl)
-  fl
-end
-
-function register_benchmark!(c::(Symbol,Symbol))
-  fl = Filter(gensym("benchmark"), data->capturebench(c,data), true, true)
-  register!(c[1], fl)
-  fl
 end
 
 # Creates a filter for each capture and registers to
 # The associated data to be captured
-function register_benchmarks!{C<:Capture}(captures::Vector{C})
+function register_benchmarks!(captures::Vector{Capture})
   fls = Array(Filter, length(captures))
   for i = 1:length(captures)
-    let capture = captures[i]
-      fls[i] = register_benchmark!(capture)
+    let c = captures[i]
+      λ = data -> capturebench(c[2],data)
+      fls[i] = Filter(gensym("benchmark"), λ, true, true)
+      register!(c[1], fls[i])
     end
   end
   fls
-end
-
-function disable_benchmarks!{C<:Capture}(captures::Vector{C})
-  for capture in captures
-    isa(capture,Symbol) && disable_filter!(capture,:benchmark)
-    isa(capture,(Symbol,Symbol)) && disable_filter!(capture[1],:benchmark)
-  end
 end
 
 # Register lenses
@@ -82,6 +59,8 @@ end
 
 # Hack for failture of type inference to detect [:a, (:a,b)] as Capture vec
 quickbench(f::Function, captures::Vector{Any}) = quickbench(f,Capture[captures...])
+# Convenience - if we just use a lens, assume we want the first captured var
+quickbench(f::Function, capture::Symbol) = quickbench(f, [(capture, [:x1])])
 
 # macro quickbench(e)
 #   @q

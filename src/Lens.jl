@@ -1,6 +1,6 @@
 module Lens
 
-import Base: isequal, hash
+import Base: isequal, hash, getindex
 
 export
   Benchmark,

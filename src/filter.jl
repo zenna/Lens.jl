@@ -1,6 +1,15 @@
 # A filter is a named function
 # It has a name so that we can remove it if desired easily
 
+# A piece of Data is sent from a lens
+immutable Data
+  procid::Int # The process that executed the lens
+  lensname::Symbol
+  data::Dict{Symbol, Any} # Variable ids, hmm
+end
+
+getindex(x::Data,i::Symbol) = x.data[i]
+
 type Filter
   name::Symbol
   f::Function
@@ -23,13 +32,16 @@ function lens(lensname::Symbol; data...)
   filters = getfilters(lensname)
   if !isempty(filters)
     for filter in filters
-      filter.enabled && filter.kwargs && filter.f(Dict{Symbol, Any}(data))
+      datum = Data(myid(), lensname, Dict{Symbol, Any}(data))
+      filter.enabled && filter.kwargs && filter.f(datum)
+      # When filter does not use kwargs just pass in the values
       filter.enabled && !filter.kwargs && filter.f([d[2] for d in data]...)
     end
   end
 end
 
-lens(lensname::Symbol, data...) = lens(lensname; [(gensym(),d) for d in data]...)
+lens(lensname::Symbol, data...) =
+  lens(lensname; [(symbol("x$i"),data[i]) for i = 1:length(data)]...)
 
 ## Enabling/Disabling Filters
 ## ==========================
