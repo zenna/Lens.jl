@@ -29,6 +29,7 @@ isequal(a::Filter, b::Filter) = a.name == b.name
 
 ## Lens KW
 function lens(lensname::Symbol; data...)
+#   println("in lens",myid(),data, lens_to_filters)
   filters = getfilters(lensname)
   if !isempty(filters)
     for filter in filters
@@ -47,11 +48,12 @@ lens(lensname::Symbol, data...) =
 ## ==========================
 # Register a lens to a filter.
 function register!(lensname::Symbol, f::Filter)
+#   println("I'm her eand registering!!!\n")
   # DefaultDict: add filter to list or create singleton filter vec
-  if haskey(lens_to_filters, lensname)
-    push!(lens_to_filters[lensname],f)
+  if haskey(Lens.lens_to_filters, lensname)
+    push!(Lens.lens_to_filters[lensname],f)
   else
-    lens_to_filters[lensname] = Set([f])
+    Lens.lens_to_filters[lensname] = Set([f])
   end
 end
 

@@ -17,30 +17,28 @@ function capturebench(vars::Vector{Symbol}, data::Data)
   end
 end
 
-# Creates a filter for each capture and registers to
+# Creates a filter for each capture and register to
 # The associated data to be captured
 function register_benchmarks!(captures::Vector{Capture})
-  fls = Array(Filter, length(captures))
-  for i = 1:length(captures)
-    let c = captures[i]
+  for c in captures
+    let c = c
       λ = data -> capturebench(c[2],data)
-      fls[i] = Filter(gensym("benchmark"), λ, true, true)
-      register!(c[1], fls[i])
+      register!(c[1], Filter(:benchmark, λ, true, true))
     end
   end
-  fls
 end
 
 # Register lenses
 function setup!{C<:Capture}(captures::Vector{C})
+#   @show "setting up", myid(), captures
   clear_benchmarks!()
   register_benchmarks!(captures)
+#   println("JUSTMADE, $lens_to_filters")
 end
 
 # Unregister lenses and delete benchmark data
-function cleanup!(fls::Vector{Filter})
-  captures = [fl.name for fl in fls]
-  for capture in captures delete_filter!(capture) end
+function cleanup!()
+  delete_filter!(:benchmark)
   clear_benchmarks!()
 end
 
@@ -49,11 +47,24 @@ end
 
 # Do a quick and dirty bechmark, captures captures and returns result too
 function quickbench{C<:Capture}(f::Function, captures::Vector{C})
-  fls = setup!(captures)
+  for proc in procs()
+    fetch(@spawnat proc setup!(captures))
+  end
+#   println("ID $lens_to_filters")
   value, Δt, Δb = @timed(f())
   lens(:total_time, Δt)
-  res = deepcopy(benchmarks)
-  cleanup!(fls)
+  local res
+
+  # When there are multiple processors, collate all data
+  if nprocs() > 1
+    res = Any[]
+    for proc in procs()
+      push!(res, remotecall_fetch(proc, ()->Lens.benchmarks))
+    end
+  else
+    res = deepcopy(benchmarks)
+  end
+  for proc in procs() @spawnat proc cleanup!() end
   value,res
 end
 
