@@ -2,8 +2,8 @@
 
 Lens.jl is a simple Julia library to introspect on the runtime behaviour of your programs, with minimal interference with the program itself.  It is useful when
 
-- You want to profile your program, but by profiling you are interested in more than just time spent, you want to inspect arbitrary statistics of arbitrary values the program.
-- You have multiple solutions to a prolem and you want to systematically compare them
+- You want to profile your program, but want to inspect arbitrary statistics of arbitrary values in the program.
+- You have multiple solutions to a prolem and you want to compare them
 
 [![Build Status](https://travis-ci.org/zenna/Lens.jl.svg?branch=master)](https://travis-ci.org/zenna/Lens.jl)
 
@@ -18,7 +18,7 @@ Pkg.clone("https://github.com/zenna/Lens.jl.git")
 # Usage
 
 Perhaps the most efficient way to understand how Lens.jl works is to look at the tests.
-
+<!-- 
 
 ## Lens
 Suppose you have a function:
@@ -67,4 +67,4 @@ f()
 
 A `Capture` is a s
 
-## Benchmarks
+## Benchmarks -->
