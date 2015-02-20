@@ -10,6 +10,7 @@ export
   lens,
   benchmarks,
   quickbench,
+  @quickbench,
   register_benchmarks!,
   disable_benchmarks!,
   disable_benchmarks,

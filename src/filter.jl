@@ -39,6 +39,8 @@ function lens(lensname::Symbol; data...)
       filter.enabled && !filter.kwargs && filter.f([d[2] for d in data]...)
     end
   end
+  v = [d[2] for d in data]
+  length(v) == 1 ? v[1] : v
 end
 
 lens(lensname::Symbol, data...) =

@@ -30,10 +30,8 @@ end
 
 # Register lenses
 function setup!{C<:Capture}(captures::Vector{C})
-#   @show "setting up", myid(), captures
   clear_benchmarks!()
   register_benchmarks!(captures)
-#   println("JUSTMADE, $lens_to_filters")
 end
 
 # Unregister lenses and delete benchmark data
@@ -50,7 +48,6 @@ function quickbench{C<:Capture}(f::Function, captures::Vector{C})
   for proc in procs()
     fetch(@spawnat proc setup!(captures))
   end
-#   println("ID $lens_to_filters")
   value, Δt, Δb = @timed(f())
   lens(:total_time, Δt)
   local res
@@ -73,12 +70,9 @@ quickbench(f::Function, captures::Vector{Any}) = quickbench(f,Capture[captures..
 # Convenience - if we just use a lens, assume we want the first captured var
 quickbench(f::Function, capture::Symbol) = quickbench(f, [(capture, [:x1])])
 
-# macro quickbench(e)
-#   @q
-#   setup!()
-#   e
-#   cleanup()!
-# end
+macro quickbench(expr,captures)
+   :(quickbench(()->$expr,$captures))
+end
 
 # Run all the benchmarks
 # function runbenchmarks(torun::Vector{Algorithm, Benchmark})
