@@ -36,6 +36,5 @@ function parbench()
   tot
 end
 
-@quickbench x + lens(:tlens, x^x) :tlens
-
-@show quickbench(parbench, :sum)
+## Test Macro
+@quickbench((x = 3 ;x + lens(:tlens, x^x)),:tlens)
