@@ -69,6 +69,8 @@ end
 quickbench(f::Function, captures::Vector{Any}) = quickbench(f,Capture[captures...])
 # Convenience - if we just use a lens, assume we want the first captured var
 quickbench(f::Function, capture::Symbol) = quickbench(f, [(capture, [:x1])])
+quickbench(f::Function, captures::Vector{Symbol}) = 
+  quickbench(f, [(capture, [:x1]) for capture in captures])
 
 macro quickbench(expr,captures)
    :(quickbench(()->$expr,$captures))

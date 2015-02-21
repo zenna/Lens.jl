@@ -1,9 +1,11 @@
 module Lens
 
+using SQLite
+using Dates
 import Base: isequal, hash, getindex
 
 export
-  Benchmark,
+  Problem,
   Algorithm,
   Filter,
   Capture,
@@ -17,6 +19,7 @@ export
 
   quickbench,
   @quickbench,
+  runbenchmarks,
 
   register!,
   getfilters,

@@ -1,4 +1,4 @@
-# A Lens into the soul of your program
+# A lens into the soul of your program
 
 Lens.jl is a simple Julia library to introspect on the runtime behaviour of your programs, with minimal interference with the program itself.  It is useful when
 
@@ -18,7 +18,7 @@ Pkg.clone("https://github.com/zenna/Lens.jl.git")
 # Usage
 
 Perhaps the most efficient way to understand how Lens.jl works is to look at the tests.
-<!-- 
+<!--
 
 ## Lens
 Suppose you have a function:

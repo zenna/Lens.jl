@@ -30,3 +30,15 @@ end
 simpletest2()
 enable_all_filters!()
 disable_all_filters!()
+
+function f()
+  x = 20
+  y = 30
+  z = 50
+  lens(:x,x)
+  lens(:y,y)
+  lens(:z,z)
+end
+
+value, res = quickbench(f,[:x,:y,:z])
+(50,[:z=>{Data(1,:z,[:x1=>50])},:x=>{Data(1,:x,[:x1=>20])},:y=>{Data(1,:y,[:x1=>30])}])
