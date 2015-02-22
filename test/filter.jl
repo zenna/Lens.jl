@@ -41,4 +41,3 @@ function f()
 end
 
 value, res = quickbench(f,[:x,:y,:z])
-(50,[:z=>{Data(1,:z,[:x1=>50])},:x=>{Data(1,:x,[:x1=>20])},:y=>{Data(1,:y,[:x1=>30])}])
