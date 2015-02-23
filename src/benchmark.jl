@@ -27,7 +27,6 @@ function capturebench!(captures::Vector{Symbol}, data::Data)
   else
     benchmarks[lensname] = [k=>[v] for (k,v) in extracteddata]
   end
-  benchmarks
 end
 
 # Creates a filter for each capture and register to
@@ -75,7 +74,6 @@ function quickbench{C<:Capture}(f::Function, captures::Vector{C})
 
   # When there are multiple processors, collate all data
   res = Result()
-  @show res
   for proc in procs()
     res.values[proc] = remotecall_fetch(proc, ()->Lens.benchmarks)
   end
