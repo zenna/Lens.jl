@@ -32,8 +32,10 @@ export
 
   lens_to_filters
 
+include("common.jl")
 include("filter.jl")
 include("benchmark.jl")
+include("db.jl")
 include("run.jl")
 include("std.jl")
 

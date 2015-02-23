@@ -1,20 +1,33 @@
 # global mutable directory connecting benchmark names with dataframes
 typealias Capture (Symbol, Vector{Symbol})
 
-clear_benchmarks!() = global benchmarks = Dict{Symbol, Vector{Any}}()
+clear_benchmarks!() = global benchmarks = Dict{Symbol,Dict{Symbol,Vector{Any}}}()
 clear_benchmarks!()
 
 # Convert a dict into an other one with only those keys in ks
 extract{K,V}(d::Dict{K,V},ks::Vector{K}) = Dict{K,V}([k=>d[k] for k in ks])
 
-function capturebench(vars::Vector{Symbol}, data::Data)
+# Capture the data and add it to global 'benchmarks'
+function capturebench!(captures::Vector{Symbol}, data::Data)
   global benchmarks
-  sliceddata = Data(data.procid, data.lensname, extract(data.data, vars))
-  if haskey(benchmarks,sliceddata.lensname)
-    push!(benchmarks[sliceddata.lensname], sliceddata)
+  # From the Data object we just pull out the data values restricted
+  # to the vars we want to capture
+  lensname = data.lensname
+  extracteddata = extract(data.data, captures)
+
+  # Default dict behaviour, if no list then create it, otherwise append
+  if haskey(benchmarks,lensname)
+    for (varname,value) in extracteddata
+      if haskey(benchmarks[lensname],varname)
+        push!(benchmarks[lensname][varname],value)
+      else
+        benchmarks[lensname][varname] = [value]
+      end
+    end
   else
-    benchmarks[sliceddata.lensname] = [sliceddata]
+    benchmarks[lensname] = [k=>[v] for (k,v) in extracteddata]
   end
+  benchmarks
 end
 
 # Creates a filter for each capture and register to
@@ -22,7 +35,7 @@ end
 function register_benchmarks!(captures::Vector{Capture})
   for c in captures
     let c = c
-      λ = data -> capturebench(c[2],data)
+      λ = data -> capturebench!(c[2],data)
       register!(c[1], Filter(:benchmark, λ, true, true))
     end
   end
@@ -43,6 +56,14 @@ end
 ## Run Benchmarks
 ## ==============
 
+# Stores the result of a benchmark
+immutable Result
+  # Processor id -> (lensname -> (varname -> Vector of values of that lens)
+  values::Dict{Int,Dict{Symbol,Dict{Symbol,Vector{Any}}}}
+end
+
+Result() = Result(Dict{Int,Dict{Symbol,Vector{Any}}}())
+
 # Do a quick and dirty bechmark, captures captures and returns result too
 function quickbench{C<:Capture}(f::Function, captures::Vector{C})
   for proc in procs()
@@ -53,13 +74,10 @@ function quickbench{C<:Capture}(f::Function, captures::Vector{C})
   local res
 
   # When there are multiple processors, collate all data
-  if nprocs() > 1
-    res = Any[]
-    for proc in procs()
-      push!(res, remotecall_fetch(proc, ()->Lens.benchmarks))
-    end
-  else
-    res = deepcopy(benchmarks)
+  res = Result()
+  @show res
+  for proc in procs()
+    res.values[proc] = remotecall_fetch(proc, ()->Lens.benchmarks)
   end
   for proc in procs() @spawnat proc cleanup!() end
   value,res
@@ -69,7 +87,7 @@ end
 quickbench(f::Function, captures::Vector{Any}) = quickbench(f,Capture[captures...])
 # Convenience - if we just use a lens, assume we want the first captured var
 quickbench(f::Function, capture::Symbol) = quickbench(f, [(capture, [:x1])])
-quickbench(f::Function, captures::Vector{Symbol}) = 
+quickbench(f::Function, captures::Vector{Symbol}) =
   quickbench(f, [(capture, [:x1]) for capture in captures])
 
 macro quickbench(expr,captures)
