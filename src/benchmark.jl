@@ -62,6 +62,9 @@ immutable Result
 end
 
 Result() = Result(Dict{Int,Dict{Symbol,Vector{Any}}}())
+convert(::Type{Vector{Result}}, x::Vector{Any}) = 
+  (rs = similar(x,Result); for i = 1:length(x) rs[i] = x[i] end)
+
 
 # Do a quick and dirty bechmark, captures captures and returns result too
 function quickbench{C<:Capture}(f::Function, captures::Vector{C})

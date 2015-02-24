@@ -2,11 +2,12 @@ module Lens
 
 using SQLite
 using Dates
-import Base: isequal, hash, getindex
+import Base: isequal, hash, getindex, convert
 
 export
   Problem,
   Algorithm,
+  Result,
   Filter,
   Capture,
   lens,
@@ -30,7 +31,12 @@ export
   disable_all_filters!,
   nfilters,
 
-  lens_to_filters
+  lens_to_filters,
+
+  #db
+  all_records,
+  where,
+  rows
 
 include("common.jl")
 include("filter.jl")
