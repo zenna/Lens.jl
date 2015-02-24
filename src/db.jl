@@ -32,71 +32,75 @@ function addrundb(db::SQLiteDB, runname::String, a::Algorithm, p::Problem,
   append(db, "runs", [[runname a p now gethostname() status result profile]])
 end
 
-## Query helpers
-## =============
+import Base: convert
+# ResultSets are not great, we'll convert everything to DataFrames
+function convert(::Type{DataFrame},rs::ResultSet)
+  df = DataFrame()
+  for i = 1:length(rs.colnames)
+    df[symbol(rs.colnames[i])] = rs[i]
+  end
+  df
+end
+
+## SQLite helpers - to make SQLite more convenient
+## ==============================================
 
 # This returns a result set where rows are removed if the predicate p
 # when applies to the rows value in the column colname is false
-function where(r::ResultSet, colname::String, p::Function)
-  coli = findfirst(r.colnames, colname)
-  coli == 0 && error("result set has no column $colname")
-  goodcols = Int[]
-
-  # Find those which satisfy filter
-  for i = 1:size(r)[1]
-    p(r[coli][i]) && push!(goodcols,i)
-  end
-
-  values = Any[]
-  for i = 1:size(r)[2]
-    col = r[i]
-    newcol = eltype(col)[]
-    for j in goodcols
-      push!(newcol,col[j])
-    end
-    push!(values,newcol)
-  end
-  ResultSet(r.colnames, values)
+function where(df::DataFrame, col::Symbol, p::Function)
+  rows = Int[]
+  for rowi = 1:size(df)[1] if p(df[rowi,col]) push!(rows,rowi) end end
+  SubDataFrame(df,rows)
 end
 
-## Get results in rowform
-function rows(rs::ResultSet)
-  vs = Vector{Any}[]
-  for i = 1:size(rs)[1]
-    v = Array(Any,size(rs)[2])
-    for j = 1:size(rs)[2]
-      v[j] = rs[i,j]
-    end
-    push!(vs,v)
+function where(df::SubDataFrame, col::Symbol, p::Function)
+  rows = Int[]
+  for rowi = 1:size(df)[1] if p(df[rowi,col]) push!(rows,rowi) end end
+  filteredrows = Array(Int,length(rows))
+  for i = 1:length(rows)
+    filteredrows[i] = df.rows[rows[i]]
   end
-  vs
+  SubDataFrame(df.parent,filteredrows)
+end
+
+import DataFrames.groupby
+function groupby(df::DataFrame, col::Symbol, f::Function)
+  groupcol = DataArray([f(df[rowi,col]) for rowi = 1:size(df)[1]])
+  dfc = copy(df)
+  dfc[:groupcol] = groupcol
+  groupby(dfc,:groupcol)
 end
 
 # Collate results across processors
-function collate(rs::Vector{Result},lensname::Symbol, varname::Symbol)
+function collate(rs::Vector{Result}, lensname::Symbol, varname::Symbol)
   combined = Any[]
   for r in rs
     for v in values(r.values)
-      records = v[lensname]
-      push!(combined, records[varname]...)
+      record = v[lensname][varname]
+      push!(combined, record)
     end
   end
   combined
 end
 
+# Groups ResultSet
+immutable GroupedResultSet
+  colnames::Vector{String}
+  groups::Dict{Any,Vector{Any}}
+end
+
 # Groups rows of results by (Algorithm,Problem) pair
 # Returns Dictionary mapping (Algorithm,Problem) to Vector of rows
-function group(q::ResultSet)
+function group(rs::ResultSet)
   d = Dict{Any,Vector{Vector{Any}}}()
-  for r in rows(q)
+  for r in rows(rs)
     key = [r[2],r[3]]
-    if haskey(d,key) push!(d[key],r) 
+    if haskey(d,key) push!(d[key],r)
     else d[key] = Vector[r] end
   end
-  d
+  GroupedResultSet(rs.colnames, d)
 end
 
 ## Convenience Queries
-# [int((i[2]) == (j[2])) for i in Lens.rows(q), j in Lens.rows(q)]
-all_records(db=rundb()) = query(db,"SELECT * from runs")
-all_failed(db=rundb()) = query(db,"SELECT * from runs WHERE status = 'FAIL'")
+
+all_records(db=rundb()) = convert(DataFrame,query(db,"SELECT * from runs"))
