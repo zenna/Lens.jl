@@ -4,7 +4,10 @@ using SQLite
 using Dates
 using DataFrames
 using Lazy
+using Gadfly
+import Base: convert
 import Base: isequal, hash, getindex, convert
+import DataFrames.groupby
 
 export
   Problem,

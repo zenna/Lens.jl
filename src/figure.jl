@@ -1,6 +1,5 @@
-using Gadfly
 function plot_xy{T1<:Real, T2<:Real}(xdata::Vector{T1}, ydata::Vector{Vector{Vector{T2}}};
-                                    xlabel::String = "", ylabel::String = "", )
+                                    xlabel::String = "", ylabel::String = "")
   dfs = DataFrames.DataFrame[]
   i = 1
   for group in ydata
@@ -44,21 +43,46 @@ function parse_results(gd::GroupedDataFrame, lensname::Symbol, varname::Symbol,
   ygroupdata
 end
 
-# Plot a Grouped Result Set
-# Every row of a resultset corresponds to a line
-function plot_xy(gd::GroupedDataFrame, postfilter::Function, lensname::Symbol,
-                 varname::Symbol; xlabel::String = "", ylabel::String = "")
-  # Extract the ydata and xdata
-  ydata = parse_results(gd, lensname, varname, postfilter)
-  xdata = [1,2,3]
-  plot_xy(xdata, ydata; xlabel = xlabel, ylabel = ylabel)
+function plot_xy_single(d::Dict; xlabel::String = "", ylabel::String = "")
+  dfs = DataFrames.DataFrame[]
+  for (group,val) in d
+    push!(dfs,DataFrame(x = val[1], y = val[2], label = string(rand())))
+  end
+
+  plot(vcat(dfs...), x=:x, y=:y, color="label",Geom.line,
+       Guide.xlabel(xlabel),
+       Guide.ylabel(ylabel),
+       Scale.x_log10,
+       Theme(key_position = :bottom))
 end
 
+function plot_xy_single(gd::GroupedDataFrame, grouper::Function,
+                        filterer::Function, getx::Function,
+                        depvar::Symbol;
+                        xlabel::String = "", ylabel::String = "")
 
+  # gd should be grouped by properties which affect the dependent variable
+  # each group will have a single line
+  dc = Dict{Any, Vector{Vector{Float64}}}()
 
+  for group in gd
+    # Then we'll group by the independent variable
+    # because since our algorithms sample, each of these groups will contain
+    # multiple runs which we want to compute statistics for
+    depgroups = grouper(group)
 
-# # Every row of a resultset corresponds to a single point on a line
-# # useful e.g. for runtime vs dimension
-# function plot_xy_single(xcolname, xextractf, ycolname, yextractf)
-#   plot_xy(x)
-# end
+    # These are all our datapoints for a particular system
+    xs = Float64[]
+    ys = Float64[]
+    for depgroup in depgroups
+      xval::Float64 = getx(depgroup) #1 is as good as any
+      collated = collate(Result[depgroup[:results]...],depvar,:x1)
+      collatedf = Float64[filterer(c) for c in collated]
+      meanc = mean(collatedf)
+      push!(xs, xval)
+      push!(ys, meanc)
+    end
+    dc[group] = Vector[xs,ys]
+  end
+  plot_xy_single(dc;xlabel = xlabel, ylabel = ylabel)
+end

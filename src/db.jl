@@ -32,7 +32,6 @@ function addrundb(db::SQLiteDB, runname::String, a::Algorithm, p::Problem,
   append(db, "runs", [[runname a p now gethostname() status result profile]])
 end
 
-import Base: convert
 # ResultSets are not great, we'll convert everything to DataFrames
 function convert(::Type{DataFrame},rs::ResultSet)
   df = DataFrame()
@@ -64,8 +63,6 @@ function where(df::SubDataFrame, col::Symbol, p::Function)
   SubDataFrame(df.parent,filteredrows)
 end
 
-
-import DataFrames.groupby
 function groupby(df::DataFrame, col::Symbol, f::Function)
   groupcol = DataArray([f(df[rowi,col]) for rowi = 1:size(df)[1]])
   dfc = copy(df)
@@ -74,7 +71,7 @@ function groupby(df::DataFrame, col::Symbol, f::Function)
 end
 
 # Group by f(row) where f accepts a singlerow DataFrame
-function groupby(df::Abstract, f::Function)
+function groupby(df::DataFrame, f::Function)
   groupcol = DataArray([f(df[rowi,:]) for rowi = 1:size(df)[1]])
   dfc = copy(df)
   dfc[:groupcol] = groupcol
