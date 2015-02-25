@@ -3,6 +3,7 @@ module Lens
 using SQLite
 using Dates
 using DataFrames
+using Lazy
 import Base: isequal, hash, getindex, convert
 
 export

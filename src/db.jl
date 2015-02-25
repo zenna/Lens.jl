@@ -73,6 +73,47 @@ function groupby(df::DataFrame, col::Symbol, f::Function)
   groupby(dfc,:groupcol)
 end
 
+# Group by f(row) where f accepts a singlerow DataFrame
+function groupby(df::Abstract, f::Function)
+  groupcol = DataArray([f(df[rowi,:]) for rowi = 1:size(df)[1]])
+  dfc = copy(df)
+  dfc[:groupcol] = groupcol
+  groupby(dfc,:groupcol)
+end
+
+# Grouping a SubDataFrame requires some extra work
+function groupby(df::SubDataFrame, fs::Vector{Function})
+  nrowsparent = size(df.parent)[1]
+#   groupcol = DataArray([f(df[rowi,:]) for rowi = 1:size(df)[1]])
+  dfc = deepcopy(df)
+
+  # Create a new column in the parent which has values only for
+  # the relevant rows (those that exist in the child)
+  das = DataArray[]
+  for f in fs
+    bitmap = [true for i = 1:nrowsparent]
+    for i in df.rows bitmap[i] = false end
+    data = Array(Any,nrowsparent)
+    for i = 1:length(df.rows)
+      data[df.rows[i]] = f(df[i,:])
+    end
+    push!(das,DataArray(data,bitmap))
+  end
+
+  # add new column to copied parent
+  dfp = copy(df.parent)
+  colnames = Symbol[symbol("groupcol$i") for i = 1:length(das)]
+  for i = 1:length(das)
+    dfp[colnames[i]] = das[i]
+  end
+
+  # reattach child and group
+  dfc = SubDataFrame(dfp,copy(df.rows))
+  groupby(dfc,colnames)
+end
+
+groupby(df::SubDataFrame, f::Function) = groupby(df,[f])
+
 # Collate results across processors
 function collate(rs::Vector{Result}, lensname::Symbol, varname::Symbol)
   combined = Any[]
@@ -85,5 +126,20 @@ function collate(rs::Vector{Result}, lensname::Symbol, varname::Symbol)
   combined
 end
 
+
+## Runtime vs holesize
+# col-field
+function cf(col::Symbol,field::Symbol)
+  x->getfield(x[col][1],field)
+end
+
+function cfun(col::Symbol,f::Function)
+  x->f(x[col][1])
+end
+
+f_eq(x) = i->i==x
+
 ## Convenience Queries
-all_records(db=rundb()) = convert(DataFrame,query(db,"SELECT * from runs WHERE status is 'DONE'"))
+all_records(db=rundb()) = convert(DataFrame,query(db,"SELECT * from runs"))
+all_done(db=rundb()) = convert(DataFrame,query(db,"SELECT * from runs WHERE status is 'DONE'"))
+

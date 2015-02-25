@@ -28,7 +28,7 @@ function plot_xy{T1<:Real, T2<:Real}(xdata::Vector{T1}, ydata::Vector{Vector{Vec
 end
 
 function parse_results(gd::GroupedDataFrame, lensname::Symbol, varname::Symbol,
-                       postfilter::Function; groupcol = :problem)
+                       postfilter::Function)
   #each group has a vector of vector
   ygroupdata = Vector{Vector{Float64}}[]
   for df in gd
@@ -36,7 +36,7 @@ function parse_results(gd::GroupedDataFrame, lensname::Symbol, varname::Symbol,
     results = df[:results]
     collated = collate(Result[array(results)...], lensname, varname)
     for c in collated
-      d = postfilter(df[1,groupcol],c)
+      d = postfilter(df[gd.cols],c)
       push!(ydata,d)
     end
     push!(ygroupdata,ydata)
