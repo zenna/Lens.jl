@@ -53,6 +53,7 @@ function where(df::DataFrame, col::Symbol, p::Function)
   SubDataFrame(df,rows)
 end
 
+
 function where(df::SubDataFrame, col::Symbol, p::Function)
   rows = Int[]
   for rowi = 1:size(df)[1] if p(df[rowi,col]) push!(rows,rowi) end end
@@ -62,6 +63,7 @@ function where(df::SubDataFrame, col::Symbol, p::Function)
   end
   SubDataFrame(df.parent,filteredrows)
 end
+
 
 import DataFrames.groupby
 function groupby(df::DataFrame, col::Symbol, f::Function)
@@ -83,24 +85,5 @@ function collate(rs::Vector{Result}, lensname::Symbol, varname::Symbol)
   combined
 end
 
-# Groups ResultSet
-immutable GroupedResultSet
-  colnames::Vector{String}
-  groups::Dict{Any,Vector{Any}}
-end
-
-# Groups rows of results by (Algorithm,Problem) pair
-# Returns Dictionary mapping (Algorithm,Problem) to Vector of rows
-function group(rs::ResultSet)
-  d = Dict{Any,Vector{Vector{Any}}}()
-  for r in rows(rs)
-    key = [r[2],r[3]]
-    if haskey(d,key) push!(d[key],r)
-    else d[key] = Vector[r] end
-  end
-  GroupedResultSet(rs.colnames, d)
-end
-
 ## Convenience Queries
-
-all_records(db=rundb()) = convert(DataFrame,query(db,"SELECT * from runs"))
+all_records(db=rundb()) = convert(DataFrame,query(db,"SELECT * from runs WHERE status is 'DONE'"))

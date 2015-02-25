@@ -2,6 +2,7 @@ module Lens
 
 using SQLite
 using Dates
+using DataFrames
 import Base: isequal, hash, getindex, convert
 
 export
@@ -36,7 +37,8 @@ export
   #db
   all_records,
   where,
-  rows
+  rows,
+  groupby
 
 include("common.jl")
 include("filter.jl")
@@ -44,5 +46,6 @@ include("benchmark.jl")
 include("db.jl")
 include("run.jl")
 include("std.jl")
+include("figure.jl")
 
 end
