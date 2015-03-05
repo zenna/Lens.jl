@@ -1,3 +1,5 @@
+using Gadfly
+
 function plot_xy{T1<:Real, T2<:Real}(xdata::Vector{T1}, ydata::Vector{Vector{Vector{T2}}};
                                     xlabel::String = "", ylabel::String = "")
   dfs = DataFrames.DataFrame[]

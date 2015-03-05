@@ -21,7 +21,8 @@ function capturebench!(captures::Vector{Symbol}, data::Data)
       if haskey(benchmarks[lensname],varname)
         push!(benchmarks[lensname][varname],value)
       else
-        benchmarks[lensname][varname] = [value]
+        benchmarks[lensname][varname] = Any[]
+        push!(benchmarks[lensname][varname],value)
       end
     end
   else
@@ -62,7 +63,7 @@ immutable Result
 end
 
 Result() = Result(Dict{Int,Dict{Symbol,Vector{Any}}}())
-convert(::Type{Vector{Result}}, x::Vector{Any}) = 
+convert(::Type{Vector{Result}}, x::Vector{Any}) =
   (rs = similar(x,Result); for i = 1:length(x) rs[i] = x[i] end)
 
 
@@ -94,6 +95,8 @@ quickbench(f::Function, captures::Vector{Symbol}) =
 macro quickbench(expr,captures)
    :(quickbench(()->$expr,$captures))
 end
+
+quickcapture = quickbench
 
 # Run all the benchmarks
 # function runbenchmarks(torun::Vector{Algorithm, Benchmark})

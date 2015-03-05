@@ -1,13 +1,6 @@
 module Lens
 
-using SQLite
-using Dates
-using DataFrames
-using Lazy
-using Gadfly
 import Base: convert
-import Base: isequal, hash, getindex, convert
-import DataFrames.groupby
 
 export
   Problem,
@@ -23,6 +16,7 @@ export
   disable_benchmarks!,
   disable_benchmarks,
 
+  quickcapture,
   quickbench,
   @quickbench,
   runbenchmarks,
@@ -44,12 +38,12 @@ export
   rows,
   groupby
 
-include("common.jl")
+# include("common.jl")
 include("filter.jl")
-include("benchmark.jl")
-include("db.jl")
-include("run.jl")
+include("capture.jl")
+# include("db.jl")
+# include("run.jl")
 include("std.jl")
-include("figure.jl")
+# include("figure.jl")
 
 end
