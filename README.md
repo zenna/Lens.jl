@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/zenna/Lens.jl.svg?branch=master)](https://travis-ci.org/zenna/Lens.jl)
 
-Lens.jl is a simple Julia package which makes it easy to dynamically inspect and extract values deep within your program, with minimal interference to the program itself.
+Lens.jl is a simple Julia package which makes it easy to dynamically inspect and extract values deep within a program, with minimal interference to the program itself.
 
 The philosophy of Lens is that observation should not imply interference.  A running program is like a machine; there are many possible things we might like to know about its behaviour, but we want a clean interface that doesn't require us to mutate our machine in order to observe it.
 
@@ -16,7 +16,7 @@ Pkg.clone("https://github.com/zenna/Lens.jl.git")
 
 # Usage
 
-Suppose we have a bubblesort:
+Suppose we have a function which (bubblesorts)[http://en.wikipedia.org/wiki/Bubble_sort] an array:
 
 ```julia
 function bubblesort{T}(a::AbstractArray{T,1})
@@ -165,7 +165,7 @@ julia> get(iters)
 julia> using Gadfly
 julia> plot(x=get(iters),Geom.density)
 ```
-![](https://github.com/zenna/Lens.jl/tree/master/images/density.svg)
+![iteration_distribution](https://raw.githubusercontent.com/zenna/Lens.jl/master/images/density.svg)
 
 ## Enabling and Disabling Filters
 
