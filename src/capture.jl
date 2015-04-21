@@ -1,5 +1,6 @@
 # global mutable directory connecting benchmark names with dataframes
-typealias Capture (Symbol, Vector{Symbol})
+#typealias Capture (Symbol, Vector{Symbol})
+typealias Capture @compat Tuple{Symbol, Vector{Symbol}}
 
 clear_benchmarks!() = global benchmarks = Dict{Symbol,Dict{Symbol,Vector{Any}}}()
 clear_benchmarks!()
@@ -79,7 +80,9 @@ function get(r::Result, proc_id=1; lensname=nothing, capturename=nothing)
   end
   entries[lensname][capturename]
 end
-get{T}(r::(T,Result); args...) = get(r[2]; args...)
+#get{T}(r::(T,Result); args...) = get(r[2]; args...)
+#get{T}(r::Tuple{T,Result,Tuple{Vararg{args}}}) = get(Tuple{r[2],Tuple{Vararg{args}}})
+get{T}(@compat r::Tuple{T,Result,Tuple{Vararg{}}}) = get(@compat Tuple{r[2],Tuple{Vararg{}}})
 
 # Do a quick and dirty bechmark, captures captures and returns result too
 function capture{C<:Capture}(f::Function, captures::Vector{C})
