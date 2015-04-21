@@ -3,8 +3,6 @@ module Lens
 import Base: convert
 
 export
-  Problem,
-  Algorithm,
   Result,
   Filter,
   Capture,

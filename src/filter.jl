@@ -1,6 +1,3 @@
-# A filter is a named function
-# It has a name so that we can remove it if desired easily
-
 # A piece of Data is sent from a lens
 immutable Data
   procid::Int # The process that executed the lens
@@ -10,6 +7,8 @@ end
 
 getindex(x::Data,i::Symbol) = x.data[i]
 
+# A filter is a named function
+# It has a name so that we can remove it if desired easily
 type Filter
   name::Symbol
   f::Function
