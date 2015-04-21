@@ -43,7 +43,7 @@ function bubblesort{T}(a::AbstractArray{T,1})
 end
 ```
 
-The algorithm details don't matter; what's important is the `lens`.  Lenses are created in one of two forms.  The first form, as used in bubblesort, is as follows:
+The algorithm details don't matter; what's important is the `lens`.  Lenses are created in one of two forms.  The first form, as used on line 7, is as follows:
 
 ```julia
 lens(lensname::Symbol, x, y, ...)
@@ -59,7 +59,7 @@ Lenses themselves do not contain any information about the filters, the filters 
 register!(println, :print_data, :start_of_loop, false)
 ```
 
-Then if we if we simply call `bubblesort` our lens will be activated.
+Then if we simply call `bubblesort` our lens will be activated.
 
 ```julia
 julia> bubblesort([1,2,0,3])
@@ -73,15 +73,20 @@ julia> bubblesort([1,2,0,3])
  3
 ```
 
-The previous call to register used the method `register!(f::Function, filtername::Symbol, lensname::Symbol, kwargs::Bool)`, took a  Function as input and automatically created a `Filter` for us.  We can of course make the `Filter` explicitly:
+The previous call to register used the method `register!(f::Function, filtername::Symbol, lensname::Symbol, kwargs::Bool)`.  It took a  function as input and automatically created a `Filter` for us.  We can of course make the `Filter` explicitly:
 
 ```julia
 register!(:start_of_loop, Filter(:print_data, print, true, true))
 ```
 
-The arguments are 1) the filters name (which might be useful if we want to remove or disable the filter later), 2) a function which transforms information sent to it by the lens 3) whether the filter is enabled or not 4) whether the filter takes keyworld arguments (we'll get to this soon)
+The arguments are:
 
-But the Function form is often more convenient, and it allows us us to use the `do` notation. 
+1) the filters name (which might be useful if we want to remove or disable the filter later)
+2) a function which transforms information sent to it by the lens
+3) whether the filter is enabled or not
+4) whether the filter takes keyworld arguments (we'll get to this soon)
+
+But the function form is often more convenient, and it allows us us to use the `do` notation. E.g.:
 
 ```julia
 julia> clear_all_filters!()
@@ -103,15 +108,17 @@ on 2-th iteration the first element is 2
 
 ## Keyword arguments
 
-The second lens in our example uses `keywoard` arguments.  Keyword arguments are useful because often as we develop our programs, we will find we want to capture to new pieces of data.  Rather than modifying all our Filters, we instead just add on the data to the keyword argument.
+The second lens in our example uses keyword arguments.  Keyword arguments are useful because often as we develop our programs, we will find we want to capture to new pieces of data.  Rather than modifying all our Filters, we instead just add on the data to with a new keyword.
 
 For example, suppose we decided now that we wanted to capture the input Array as well as the sorted array, we would simply change the lens to
 
 `lens(:after_loop, inputdata=a, sorteddata=b, niters=i)`
 
+__Note__: A function used in a filter that takes input from a keyword argument lens will recieve a single input.  It can extract the relevant fields using `data[:key]` syntax.
+
 ## Capturing
 
-Often we want to just extract or capture some values somewhere deep within our programs.  Suppose we're interested in the distributon over the number of loop iterations.  Let's modify our example so to randomly generate $n$ strings and bubblesort them all.
+Often we want to just extract or capture some values somewhere deep within our programs.  Suppose we're interested in the distributon over the number of loop iterations.  Let's extend our example so to randomly generate 1000 vectors and bubblesorts them all.
 
 ```julia
 function many_bubbles()
@@ -121,7 +128,7 @@ function many_bubbles()
 end
 ```
 
-captures retruns a pair `(return, Result)` where `return` is the value returned from calling the function passed into capture, and `Result` is a  datastructure which contained the captured information.  `Result` is a little complicated as a datastructure, but we can easily extract the data we need.
+`capture` retruns a pair `(value, result)` where `value` is the value returned from calling the function passed into capture, and `result` is a  datastructure which contains the captured information.  A `result` is a little complicated as a datastructure, but we can easily extract the data we need using `get`.
 
 ```julia
 julia> get(iters)
@@ -165,11 +172,11 @@ julia> get(iters)
 julia> using Gadfly
 julia> plot(x=get(iters),Geom.density)
 ```
-![iteration_distribution](https://raw.githubusercontent.com/zenna/Lens.jl/master/images/density.svg)
+![iteration_distribution](images/density.svg?raw=true)
 
 ## Enabling and Disabling Filters
 
-If you want to temporarily disable all the filters and render all your lenses ineffectual use `disable_all_filters!()`.  To renable them all use `enable_all_filters!()`.  These can be convenient for example if you want dynamically switch between filters which are printing information to the screen.
+If you want to temporarily disable all the filters and render all your lenses ineffective use `disable_all_filters!()`.  To re-enable them all use `enable_all_filters!()`.  These can be convenient for example if you want dynamically switch between filters which are printing information to the screen.
 
 For more fine grained control use enable `enable_filter!(watch_name::Symbol, filter_name::Symbol)` which enables the lens with name `watch_name` propagating to the filter with name `filter_name`.  Unsurprisingly, these is also `disable_filter!`.
 
