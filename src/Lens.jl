@@ -1,5 +1,7 @@
 module Lens
 
+using Compat
+
 import Base: convert
 
 export
