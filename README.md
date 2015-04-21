@@ -16,7 +16,7 @@ Pkg.clone("https://github.com/zenna/Lens.jl.git")
 
 # Usage
 
-Suppose we have a function which (bubblesorts)[http://en.wikipedia.org/wiki/Bubble_sort] an array:
+Suppose we have a function which [bubble sorts](http://en.wikipedia.org/wiki/Bubble_sort) an array:
 
 ```julia
 function bubblesort{T}(a::AbstractArray{T,1})
