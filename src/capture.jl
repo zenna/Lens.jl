@@ -82,7 +82,7 @@ function get(r::Result, proc_id=1; lensname=nothing, capturename=nothing)
 end
 #get{T}(r::(T,Result); args...) = get(r[2]; args...)
 #get{T}(r::Tuple{T,Result,Tuple{Vararg{args}}}) = get(Tuple{r[2],Tuple{Vararg{args}}})
-get{T}(@compat r::Tuple{T,Result,Tuple{Vararg{}}}) = get(@compat Tuple{r[2],Tuple{Vararg{}}})
+get{T}(@compat r::Tuple{T,Result}) = get(r[2])
 
 # Do a quick and dirty bechmark, captures captures and returns result too
 function capture{C<:Capture}(f::Function, captures::Vector{C})
