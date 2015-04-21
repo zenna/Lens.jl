@@ -66,9 +66,23 @@ Result() = Result(Dict{Int,Dict{Symbol,Vector{Any}}}())
 convert(::Type{Vector{Result}}, x::Vector{Any}) =
   (rs = similar(x,Result); for i = 1:length(x) rs[i] = x[i] end)
 
+# Convenience functions for extracting data from a Result
+function get(r::Result, proc_id=1; lensname=nothing, capturename=nothing)
+  entries = r.values[proc_id]
+  if lensname == nothing
+    length(entries) != 1 && error("No lensname specified and more than one lens captured")
+    lensname = first(entries)[1]
+  end
+  if capturename == nothing
+    length(entries[lensname]) != 1 && error("No capture name specified and more than one captured <found></found>")
+    capturename = first(entries[lensname])[1]
+  end
+  entries[lensname][capturename]
+end
+get{T}(r::(T,Result); args...) = get(r[2]; args...)
 
 # Do a quick and dirty bechmark, captures captures and returns result too
-function quickbench{C<:Capture}(f::Function, captures::Vector{C})
+function capture{C<:Capture}(f::Function, captures::Vector{C})
   for proc in procs()
     fetch(@spawnat proc setup!(captures))
   end
@@ -86,19 +100,12 @@ function quickbench{C<:Capture}(f::Function, captures::Vector{C})
 end
 
 # Hack for failture of type inference to detect [:a, (:a,b)] as Capture vec
-quickbench(f::Function, captures::Vector{Any}) = quickbench(f,Capture[captures...])
+capture(f::Function, captures::Vector{Any}) = capture(f,Capture[captures...])
 # Convenience - if we just use a lens, assume we want the first captured var
-quickbench(f::Function, capture::Symbol) = quickbench(f, [(capture, [:x1])])
-quickbench(f::Function, captures::Vector{Symbol}) =
-  quickbench(f, [(capture, [:x1]) for capture in captures])
+capture(f::Function, capturename::Symbol) = capture(f, [(capturename, [:x1])])
+capture(f::Function, captures::Vector{Symbol}) =
+  capture(f, [(capture, [:x1]) for capture in captures])
 
-macro quickbench(expr,captures)
-   :(quickbench(()->$expr,$captures))
+macro capture(expr,captures)
+   :(capture(()->$expr,$captures))
 end
-
-quickcapture = quickbench
-
-# Run all the benchmarks
-# function runbenchmarks(torun::Vector{Algorithm, Benchmark})
-#   e
-# end

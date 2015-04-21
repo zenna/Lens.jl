@@ -2,7 +2,7 @@ using Base.Test
 using Lens
 
 clear_all_filters!()
-@test length(values(lens_to_filters)) == 0
+@test length(values(Lens.lens_to_filters)) == 0
 
 function simpletest1()
   a = 10
@@ -40,4 +40,4 @@ function f()
   lens(:z,z)
 end
 
-value, res = quickbench(f,[:x,:y,:z])
+value, res = capture(f,[:x,:y,:z])

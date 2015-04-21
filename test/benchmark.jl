@@ -11,15 +11,15 @@ function f()
   40
 end
 
-value, results = quickbench(f, [(:mylens,[:x])])
+value, results = capture(f, [(:mylens,[:x])])
 @test value == 40
-@test results[:mylens][1].data[:x] == 10
-value, results = quickbench(f, :his)
-@test results[:his][1].data[:x1] == 20
+@test get(results)[1] == 10
+value, results = capture(f, :his)
+@test get(results)[1] == 20
 
-value, results = quickbench(f, [(:yourlens, [:z,:y])])
-@test results[:yourlens][1].data[:z] == 30
-@test results[:yourlens][1].data[:y] == 20
+value, results = capture(f, [(:yourlens, [:z,:y])])
+@test get(results;capturename=:z)[1] == 30
+@test get(results;capturename=:y)[1] == 20
 
 ## Parallel Tests
 addprocs(1)
@@ -37,4 +37,4 @@ function parbench()
 end
 
 ## Test Macro
-@quickbench((x = 3 ;x + lens(:tlens, x^x)),:tlens)
+@capture((x = 3 ;x + lens(:tlens, x^x)),:tlens)

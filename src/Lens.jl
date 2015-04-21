@@ -7,17 +7,11 @@ export
   Filter,
   Capture,
   lens,
-  benchmarks,
-  quickbench,
-  @quickbench,
+  capture,
+  @capture,
   register_benchmarks!,
   disable_benchmarks!,
   disable_benchmarks,
-
-  quickcapture,
-  quickbench,
-  @quickbench,
-  runbenchmarks,
 
   register!,
   getfilters,
@@ -28,20 +22,10 @@ export
   disable_all_filters!,
   nfilters,
 
-  lens_to_filters,
+  get
 
-  #db
-  all_records,
-  where,
-  rows,
-  groupby
-
-# include("common.jl")
 include("filter.jl")
 include("capture.jl")
-# include("db.jl")
-# include("run.jl")
 include("std.jl")
-# include("figure.jl")
 
 end
