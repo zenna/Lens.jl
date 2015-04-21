@@ -168,11 +168,11 @@ julia> get(iters)
  95
 ```
 
-```julia
+<!-- ```julia
 julia> using Gadfly
 julia> plot(x=get(iters),Geom.density)
 ```
-![iteration_distribution](images/density.svg?raw=true)
+![iteration_distribution](images/density.svg?raw=true) -->
 
 ## Enabling and Disabling Filters
 
