@@ -81,10 +81,10 @@ register!(:start_of_loop, Filter(:print_data, print, true, true))
 
 The arguments are:
 
-1) the filters name (which might be useful if we want to remove or disable the filter later)
-2) a function which transforms information sent to it by the lens
-3) whether the filter is enabled or not
-4) whether the filter takes keyworld arguments (we'll get to this soon)
+1. the filters name (which might be useful if we want to remove or disable the filter later)
+2. a function which transforms information sent to it by the lens
+3. whether the filter is enabled or not
+4. whether the filter takes keyworld arguments (we'll get to this soon)
 
 But the function form is often more convenient, and it allows us us to use the `do` notation. E.g.:
 
