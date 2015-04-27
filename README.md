@@ -8,10 +8,11 @@ The philosophy of Lens is that observation should not imply interference.  A run
 
 # Installation
 
-Lens is not yet in the official Julia Package repository.  You can still easily install it from a Julia repl with
+Lens is in the official Julia Package repository.  You can easily install it from a Julia REPL with:
 
 ```julia
-Pkg.clone("https://github.com/zenna/Lens.jl.git")
+Pkg.add("Lens")
+using Lens
 ```
 
 # Usage
