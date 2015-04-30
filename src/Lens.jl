@@ -2,7 +2,7 @@ module Lens
 
 using Compat
 
-import Base: convert
+import Base: convert, get
 
 export
   Result,
