@@ -1,4 +1,4 @@
-tests = ["benchmark","filter", "examples/bubblesort"]
+tests = ["capture","listener", "examples/bubblesort"]
 
 println("Running tests:")
 

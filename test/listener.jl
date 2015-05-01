@@ -1,8 +1,8 @@
 using Base.Test
 using Lens
 
-clear_all_filters!()
-@test length(values(Lens.lens_to_filters)) == 0
+clear_all_listeners!()
+@test length(values(Lens.lens_to_listeners)) == 0
 
 function simpletest1()
   a = 10
@@ -11,12 +11,12 @@ function simpletest1()
 end
 
 gfunc(m) = @test sum(m[:a]) + sum(m[:b]) == 20
-register!(:after_rands1, Filter(:gfunc, gfunc, true, true))
-@test nfilters() == 1
-enable_all_filters!()
+register!(:after_rands1, Listener(:gfunc, gfunc, true, true))
+@test nlisteners() == 1
+enable_all_listeners!()
 simpletest1()
 
-clear_all_filters!()
+clear_all_listeners!()
 function simpletest2()
   a = 10
   b = 10
@@ -28,8 +28,8 @@ register!(:gunit, :after_rands2, false) do x,y
 end
 
 simpletest2()
-enable_all_filters!()
-disable_all_filters!()
+enable_all_listeners!()
+disable_all_listeners!()
 
 function f()
   x = 20

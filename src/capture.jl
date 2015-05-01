@@ -1,90 +1,62 @@
 # global mutable directory connecting benchmark names with dataframes
-#typealias Capture (Symbol, Vector{Symbol})
 typealias Capture @compat Tuple{Symbol, Vector{Symbol}}
 
-clear_benchmarks!() = global benchmarks = Dict{Symbol,Dict{Symbol,Vector{Any}}}()
-clear_benchmarks!()
+# Lensname -> Varname -> Vector of captued values
+clear_captured!() = global captured = Dict{Symbol,Dict{Symbol,Vector{Any}}}()
+clear_captured!()
 
 # Convert a dict into an other one with only those keys in ks
 extract{K,V}(d::Dict{K,V},ks::Vector{K}) = Dict{K,V}([k=>d[k] for k in ks])
 
-# Capture the data and add it to global 'benchmarks'
+# Capture the data and add it to global 'captured'
 function capturebench!(captures::Vector{Symbol}, data::Data)
-  global benchmarks
+  global captured
   # From the Data object we just pull out the data values restricted
   # to the vars we want to capture
   lensname = data.lensname
   extracteddata = extract(data.data, captures)
 
   # Default dict behaviour, if no list then create it, otherwise append
-  if haskey(benchmarks,lensname)
+  if haskey(captured,lensname)
     for (varname,value) in extracteddata
-      if haskey(benchmarks[lensname],varname)
-        push!(benchmarks[lensname][varname],value)
+      if haskey(captured[lensname],varname)
+        push!(captured[lensname][varname],value)
       else
-        benchmarks[lensname][varname] = Any[]
-        push!(benchmarks[lensname][varname],value)
+        captured[lensname][varname] = Any[]
+        push!(captured[lensname][varname],value)
       end
     end
   else
-    benchmarks[lensname] = [k=>[v] for (k,v) in extracteddata]
+    captured[lensname] = [k => [v] for (k,v) in extracteddata]
   end
 end
 
-# Creates a filter for each capture and register to
+# Creates a listener for each capture and register to
 # The associated data to be captured
-function register_benchmarks!(captures::Vector{Capture})
+function register_captured!(captures::Vector{Capture})
   for c in captures
     let c = c
       λ = data -> capturebench!(c[2],data)
-      register!(c[1], Filter(:benchmark, λ, true, true))
+      register!(c[1], Listener(:benchmark, λ, true, true))
     end
   end
 end
 
 # Register lenses
 function setup!{C<:Capture}(captures::Vector{C})
-  clear_benchmarks!()
-  register_benchmarks!(captures)
+  clear_captured!()
+  register_captured!(captures)
 end
 
 # Unregister lenses and delete benchmark data
 function cleanup!()
-  delete_filter!(:benchmark)
-  clear_benchmarks!()
+  delete_listener!(:benchmark)
+  clear_captured!()
 end
 
-## Run Benchmarks
-## ==============
-
-# Stores the result of a benchmark
-immutable Result
-  # Processor id -> (lensname -> (varname -> Vector of values of that lens)
-  values::Dict{Int,Dict{Symbol,Dict{Symbol,Vector{Any}}}}
-end
-
-Result() = Result(Dict{Int,Dict{Symbol,Vector{Any}}}())
-convert(::Type{Vector{Result}}, x::Vector{Any}) =
-  (rs = similar(x,Result); for i = 1:length(x) rs[i] = x[i] end)
-
-# Convenience functions for extracting data from a Result
-function get(r::Result, proc_id=1; lensname=nothing, capturename=nothing)
-  entries = r.values[proc_id]
-  if lensname == nothing
-    length(entries) != 1 && error("No lensname specified and more than one lens captured")
-    lensname = first(entries)[1]
-  end
-  if capturename == nothing
-    length(entries[lensname]) != 1 && error("No capture name specified and more than one captured <found></found>")
-    capturename = first(entries[lensname])[1]
-  end
-  entries[lensname][capturename]
-end
-#get{T}(r::(T,Result); args...) = get(r[2]; args...)
-#get{T}(r::Tuple{T,Result,Tuple{Vararg{args}}}) = get(Tuple{r[2],Tuple{Vararg{args}}})
-get{T}(@compat r::Tuple{T,Result}) = get(r[2])
-
-# Do a quick and dirty bechmark, captures captures and returns result too
+@doc "Quick and dirty capture:
+  Evaluates `f()` and captures any values specified in `captures`.
+  Also returns result of `f()`" ->
 function capture{C<:Capture}(f::Function, captures::Vector{C})
   for proc in procs()
     fetch(@spawnat proc setup!(captures))
@@ -96,7 +68,7 @@ function capture{C<:Capture}(f::Function, captures::Vector{C})
   # When there are multiple processors, collate all data
   res = Result()
   for proc in procs()
-    res.values[proc] = remotecall_fetch(proc, ()->Lens.benchmarks)
+    res.values[proc] = remotecall_fetch(proc, ()->Lens.captured)
   end
   for proc in procs() @spawnat proc cleanup!() end
   value,res

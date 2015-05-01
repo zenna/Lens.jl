@@ -1,5 +1,5 @@
-## Standard Filters
+## Standard Listeners
 ## ================
 
-printfl = Filter(:print, x->print(x...),true,false)
-printlnfl = Filter(:print, x->println(x...),true,false)
+printfl = Listener(:print, x->print(x...),true,false)
+printlnfl = Listener(:print, x->println(x...),true,false)

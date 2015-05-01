@@ -50,11 +50,11 @@ The algorithm details don't matter; what's important is the `lens`.  Lenses are 
 lens(lensname::Symbol, x, y, ...)
 ```
 
-The first argument is a symbol and gives a name to the lens.  We'll need to remember the name for later when we attach *filters* to the lens.
+The first argument is a symbol and gives a name to the lens.  We'll need to remember the name for later when we attach *listeners* to the lens.
 The remaining arguments `x,y,...` are any values you want the lens to capture.
 
 Lenses capture values we specify, then propagate that data onto `Filters`.
-Lenses themselves do not contain any information about the filters, the filters are attached onto Lens through a function `register!`.  For example we can register a printing filter to the lens with:
+Lenses themselves do not contain any information about the listeners, the listeners are attached onto Lens through a function `register!`.  For example we can register a printing listener to the lens with:
 
 ```julia
 register!(println, :print_data, :start_of_loop, false)
@@ -74,7 +74,7 @@ julia> bubblesort([1,2,0,3])
  3
 ```
 
-The previous call to register used the method `register!(f::Function, filtername::Symbol, lensname::Symbol, kwargs::Bool)`.  It took a  function as input and automatically created a `Filter` for us.  We can of course make the `Filter` explicitly:
+The previous call to register used the method `register!(f::Function, listenername::Symbol, lensname::Symbol, kwargs::Bool)`.  It took a  function as input and automatically created a `Filter` for us.  We can of course make the `Filter` explicitly:
 
 ```julia
 register!(:start_of_loop, Filter(:print_data, print, true, true))
@@ -82,15 +82,15 @@ register!(:start_of_loop, Filter(:print_data, print, true, true))
 
 The arguments are:
 
-1. the filters name (which might be useful if we want to remove or disable the filter later)
+1. the listeners name (which might be useful if we want to remove or disable the listener later)
 2. a function which transforms information sent to it by the lens
-3. whether the filter is enabled or not
-4. whether the filter takes keyworld arguments (we'll get to this soon)
+3. whether the listener is enabled or not
+4. whether the listener takes keyworld arguments (we'll get to this soon)
 
 But the function form is often more convenient, and it allows us us to use the `do` notation. E.g.:
 
 ```julia
-julia> clear_all_filters!()
+julia> clear_all_listeners!()
 julia> register!(:print_data, :start_of_loop, false) do data, index
          println("on $index-th iteration the first element is $(index[1])")
        end
@@ -115,7 +115,7 @@ For example, suppose we decided now that we wanted to capture the input Array as
 
 `lens(:after_loop, inputdata=a, sorteddata=b, niters=i)`
 
-__Note__: A function used in a filter that takes input from a keyword argument lens will recieve a single input.  It can extract the relevant fields using `data[:key]` syntax.
+__Note__: A function used in a listener that takes input from a keyword argument lens will recieve a single input.  It can extract the relevant fields using `data[:key]` syntax.
 
 ## Capturing
 
@@ -177,8 +177,8 @@ julia> plot(x=get(iters),Geom.density)
 
 ## Enabling and Disabling Filters
 
-If you want to temporarily disable all the filters and render all your lenses ineffective use `disable_all_filters!()`.  To re-enable them all use `enable_all_filters!()`.  These can be convenient for example if you want dynamically switch between filters which are printing information to the screen.
+If you want to temporarily disable all the listeners and render all your lenses ineffective use `disable_all_listeners!()`.  To re-enable them all use `enable_all_listeners!()`.  These can be convenient for example if you want dynamically switch between listeners which are printing information to the screen.
 
-For more fine grained control use enable `enable_filter!(watch_name::Symbol, filter_name::Symbol)` which enables the lens with name `watch_name` propagating to the filter with name `filter_name`.  Unsurprisingly, these is also `disable_filter!`.
+For more fine grained control use enable `enable_listener!(watch_name::Symbol, listener_name::Symbol)` which enables the lens with name `watch_name` propagating to the listener with name `listener_name`.  Unsurprisingly, these is also `disable_listener!`.
 
-For more permanent effect there is `delete_filter!` and `clear_all_filters!`, which are just like above but not temporary.
+For more permanent effect there is `delete_listener!` and `clear_all_listeners!`, which are just like above but not temporary.

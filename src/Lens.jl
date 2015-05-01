@@ -1,12 +1,13 @@
 module Lens
 
 using Compat
-
 import Base: convert, get
+
+VERSION < v"0.4-" && using Docile
 
 export
   Result,
-  Filter,
+  Listener,
   Capture,
   lens,
   capture,
@@ -16,17 +17,18 @@ export
   disable_benchmarks,
 
   register!,
-  getfilters,
-  clear_all_filters!,
-  enable_all_filters!,
-  enable_filter!,
-  disable_filter!,
-  disable_all_filters!,
-  nfilters,
+  getlisteners,
+  clear_all_listeners!,
+  enable_all_listeners!,
+  enable_listener!,
+  disable_listener!,
+  disable_all_listeners!,
+  nlisteners,
 
   get
 
-include("filter.jl")
+include("listener.jl")
+include("result.jl")
 include("capture.jl")
 include("std.jl")
 
