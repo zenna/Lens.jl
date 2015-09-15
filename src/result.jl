@@ -10,7 +10,7 @@ convert(::Type{Vector{Result}}, x::Vector{Any}) =
   (rs = similar(x,Result); for i = 1:length(x) rs[i] = x[i] end)
 
 # Convenience functions for extracting data from a Result
-function get(r::Result, proc_id=1; lensname=nothing, capturename=nothing)
+function get(r::Result; proc_id::Int=1, lensname=nothing, capturename=nothing)
   entries = r.values[proc_id]
   if lensname == nothing
     length(entries) != 1 && error("No lensname specified and more than one lens captured")

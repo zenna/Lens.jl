@@ -57,11 +57,27 @@ end
 @doc "Quick and dirty capture:
   Evaluates `f()` and captures any values specified in `captures`.
   Also returns result of `f()`" ->
-function capture{C<:Capture}(f::Function, captures::Vector{C})
+function capture{C<:Capture}(f::Function, captures::Vector{C}; exceptions = true)
   for proc in procs()
     fetch(@spawnat proc setup!(captures))
   end
-  value, Δt, Δb = @timed(f())
+
+  local Δt
+  local Δb
+  local value
+  if exceptions
+    try
+      value, Δt, Δb = @timed(f())
+    catch e
+      println("Uncaught exception trickled down to capture:")
+      println(e)
+      value = nothing
+      Δt = 0
+      Δb = 0
+    end
+  else
+    value, Δt, Δb = @timed(f())
+  end
   lens(:total_time, Δt)
   local res
 
@@ -75,11 +91,13 @@ function capture{C<:Capture}(f::Function, captures::Vector{C})
 end
 
 # Hack for failture of type inference to detect [:a, (:a,b)] as Capture vec
-capture(f::Function, captures::Vector{Any}) = capture(f,Capture[captures...])
+capture(f::Function, captures::Vector{Any}; exceptions = true) = 
+  capture(f,Capture[captures...]; exceptions = exceptions)
 # Convenience - if we just use a lens, assume we want the first captured var
-capture(f::Function, capturename::Symbol) = capture(f, [(capturename, [:x1])])
-capture(f::Function, captures::Vector{Symbol}) =
-  capture(f, [(capture, [:x1]) for capture in captures])
+capture(f::Function, capturename::Symbol; exceptions = true) = 
+  capture(f, [(capturename, [:x1])]; exceptions = exceptions)
+capture(f::Function, captures::Vector{Symbol}; exceptions = true) =
+  capture(f, [(capture, [:x1]) for capture in captures]; exceptions = exceptions)
 
 macro capture(expr,captures)
    :(capture(()->$expr,$captures))
