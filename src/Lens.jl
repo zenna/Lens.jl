@@ -1,9 +1,7 @@
 module Lens
 
 using Compat
-import Base: convert, get
-
-VERSION < v"0.4-" && using Docile
+import Base: convert, get, getindex
 
 export
   Result,
@@ -25,7 +23,7 @@ export
   disable_all_listeners!,
   nlisteners,
 
-  get
+  getindex
 
 include("listener.jl")
 include("result.jl")
