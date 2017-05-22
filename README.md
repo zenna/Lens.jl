@@ -50,7 +50,7 @@ The algorithm details don't matter; what's important is the `lens`.  Lenses are 
 lens(lensname::Symbol, x, y, ...)
 ```
 
-The first argument is a symbol and gives a name to the lens.  We'll need to remember the name for later when we attach *listeners* to the lens.
+The first argument is a Symbol and gives a name to the lens.  We'll need to remember the name for later when we attach *listeners* to the lens.
 The remaining arguments `x,y,...` are any values you want the lens to capture.
 
 Lenses capture values we specify, then propagate that data onto `Filters`.

@@ -6,7 +6,7 @@ clear_captured!() = global captured = Dict{Symbol,Dict{Symbol,Vector{Any}}}()
 clear_captured!()
 
 # Convert a dict into an other one with only those keys in ks
-extract{K,V}(d::Dict{K,V},ks::Vector{K}) = Dict{K,V}([k=>d[k] for k in ks])
+extract{K,V}(d::Dict{K,V},ks::Vector{K}) = Dict{K,V}(k=>d[k] for k in ks)
 
 # Capture the data and add it to global 'captured'
 function capturebench!(captures::Vector{Symbol}, data::Data)
@@ -27,7 +27,7 @@ function capturebench!(captures::Vector{Symbol}, data::Data)
       end
     end
   else
-    captured[lensname] = [k => [v] for (k,v) in extracteddata]
+    captured[lensname] = Dict(k => [v] for (k,v) in extracteddata)
   end
 end
 
@@ -91,10 +91,10 @@ function capture{C<:Capture}(f::Function, captures::Vector{C}; exceptions = true
 end
 
 # Hack for failture of type inference to detect [:a, (:a,b)] as Capture vec
-capture(f::Function, captures::Vector{Any}; exceptions = true) = 
+capture(f::Function, captures::Vector{Any}; exceptions = true) =
   capture(f,Capture[captures...]; exceptions = exceptions)
 # Convenience - if we just use a lens, assume we want the first captured var
-capture(f::Function, capturename::Symbol; exceptions = true) = 
+capture(f::Function, capturename::Symbol; exceptions = true) =
   capture(f, [(capturename, [:x1])]; exceptions = exceptions)
 capture(f::Function, captures::Vector{Symbol}; exceptions = true) =
   capture(f, [(capture, [:x1]) for capture in captures]; exceptions = exceptions)

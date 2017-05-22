@@ -43,7 +43,7 @@ function lens(lensname::Symbol; data...)
 end
 
 lens(lensname::Symbol, data...) =
-  lens(lensname; [(symbol("x$i"),data[i]) for i = 1:length(data)]...)
+  lens(lensname; [(Symbol("x$i"),data[i]) for i = 1:length(data)]...)
 
 ## Enabling/Disabling Listeners
 ## ==========================
