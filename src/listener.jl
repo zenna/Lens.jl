@@ -1,5 +1,5 @@
-# A piece of Data is sent from a lens
-immutable Data
+"Piece of `Data` is sent from a lens"
+struct Data
   procid::Int # The process that executed the lens
   lensname::Symbol
   data::Dict{Symbol, Any} # Variable ids, hmm
@@ -7,18 +7,21 @@ end
 
 getindex(x::Data,i::Symbol) = x.data[i]
 
-# A listener is a named function
-# It has a name so that we can remove it if desired easily
-type Listener
+"""
+A listener is a named function
+It has a name so that we can remove it if desired easily
+"""
+struct Listener
   name::Symbol
   f::Function
   enabled::Bool
-  kwargs::Bool #Does the function take its argument as keywords
+  kwargs::Bool # Does the function take its argument as keywords
 end
 
 ## Lenses
 ## ======
-# global mutable directory connecting lenses to listeners
+
+"global mutable directory connecting lenses to listeners"
 lens_to_listeners = Dict{Symbol, Set{Listener}}()
 
 # Two listeners are considered equal if they have the same name
@@ -26,7 +29,7 @@ hash(a::Listener) = hash(a.name)
 # ==(a::Listener,b::Listener) = a.name == b.name
 isequal(a::Listener, b::Listener) = a.name == b.name
 
-## Lens KW
+"Lens KW"
 function lens(lensname::Symbol; data...)
 #   println("in lens",myid(),data, lens_to_listeners)
   listeners = getlisteners(lensname)
@@ -47,7 +50,8 @@ lens(lensname::Symbol, data...) =
 
 ## Enabling/Disabling Listeners
 ## ==========================
-# Register a lens to a listener.
+
+"Register a lens to a listener."
 function register!(lensname::Symbol, f::Listener)
 #   println("I'm her eand registering!!!\n")
   # DefaultDict: add listener to list or create singleton listener vec
@@ -58,25 +62,28 @@ function register!(lensname::Symbol, f::Listener)
   end
 end
 
-# Create/register a Listener with function and f and name listenername to lensname
+"Create/register a `Listener` with function and f and name listenername to lensname"
 register!(f::Function, listenername::Symbol, lensname::Symbol, kwargs::Bool) =
   register!(lensname, Listener(listenername, f, true, kwargs))
 
-# Clearing is permanent
+"permanently clearing all listeners"
 clear_all_listeners!() = global lens_to_listeners = Dict{Symbol, Set{Listener}}()
 
+"Delete a listener"
 function delete_listener!(listener_name::Symbol)
   for l in values(lens_to_listeners), f in l
     if f.name == listener_name delete!(l,f) end
   end
 end
 
+"Enable a listener"
 function enable_listener!(watch_name::Symbol, listener_name::Symbol)
   for f in lens_to_listeners[watch_name]
     if f.name == listener_name f.enabled = true end
   end
 end
 
+"(temporarily) disable a listener"
 function disable_listener!(lensname::Symbol, listener_name::Symbol)
   for f in lens_to_listeners[lensname]
     if f.name == listener_name f.enabled = false end

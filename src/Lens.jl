@@ -1,33 +1,32 @@
+"A (mini) lens into the soul of your program"
 module Lens
 
-using Compat
-import Base: convert, get, getindex
+using Cassette
+using Spec
 
-export
-  Result,
-  Listener,
-  Capture,
-  lens,
-  capture,
-  @capture,
-  register_benchmarks!,
-  disable_benchmarks!,
-  disable_benchmarks,
+Cassette.@context LensCtx
 
-  register!,
-  getlisteners,
-  clear_all_listeners!,
-  enable_all_listeners!,
-  enable_listener!,
-  disable_listener!,
-  disable_all_listeners!,
-  nlisteners,
+"Create a named lens"
+function lens end
 
-  getindex
+# lens(nm, args...) = nothing
+lens(nm, args::NamedTuple) = args
+lens(nm; kwargs...) = lens(nm, kwargs)
 
-include("listener.jl")
-include("result.jl")
-include("capture.jl")
-include("std.jl")
+function Cassette.execute(ctx::LensCtx, ::typeof(lens), nm::Symbol, args)
+  lensmap = ctx.metadata
+  if haskey(lensmap, nm)
+    fs = getfield(ctx.metadata, nm)
+    foreach(f -> f(args...), fs)
+  else
+    args
+  end
+end
+
+function lensapply(lensmap, f, args...)
+  Cassette.overdub(LensCtx(metadata = lensmap), f, args...)
+end
+
+export lens, lensapply
 
 end

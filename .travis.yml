@@ -1,17 +1,26 @@
-language: cpp
-compiler:
-  - clang
+language: julia
+dist: trusty
+sudo: true
+os:
+  - linux
+  - osx
+julia:
+  - 0.6
+  - nightly
 notifications:
   email: false
 env:
-  matrix:
-    - JULIAVERSION="juliareleases"
-    - JULIAVERSION="julianightlies"
-before_install:
-  - sudo add-apt-repository ppa:staticfloat/julia-deps -y
-  - sudo add-apt-repository ppa:staticfloat/${JULIAVERSION} -y
-  - sudo apt-get update -qq -y
-  - sudo apt-get install libpcre3-dev julia -y
-  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+  - DOCUMENTER_DEBUG="true" CONDA_JL_VERSION="2" PYTHON=""
 script:
-  - julia -e 'Pkg.init(); Pkg.clone(pwd()); Pkg.test("Lens")'
+  - julia -e 'Pkg.clone("https://github.com/zenna/Spec.jl")'
+  - julia -e 'Pkg.clone(pwd())'
+  - julia -e 'Pkg.build("Lens")'
+  - julia -e 'Pkg.test("Lens", coverage=true)'
+after_success:
+  - julia -e 'cd(Pkg.dir("Lens")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
+  - julia -e 'Pkg.add("Documenter")'
+  - julia -e 'cd(Pkg.dir("Lens")); include(joinpath("docs", "make.jl"))'
+matrix:
+  fast_finish: true
+  allow_failures:
+    - julia: nightly
