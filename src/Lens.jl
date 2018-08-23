@@ -12,7 +12,7 @@ Create a named lens
 """
 function lens end
 
-# lens(nm, args...) = nothing
+lens(nm, args...) = args
 lens(nm, args::NamedTuple) = args
 lens(nm; kwargs...) = lens(nm, kwargs)
 
