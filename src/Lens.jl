@@ -1,31 +1,29 @@
-"A (mini) lens into the soul of your program"
+"A lens into the soul of your program"
 module Lens
 
 using Cassette
 using Spec
 
-Cassette.@context LensCtx
+"""
+Create a named lens
 
-"Create a named lens"
+```julia
+```
+"""
 function lens end
 
 # lens(nm, args...) = nothing
 lens(nm, args::NamedTuple) = args
 lens(nm; kwargs...) = lens(nm, kwargs)
 
-function Cassette.execute(ctx::LensCtx, ::typeof(lens), nm::Symbol, args)
-  lensmap = ctx.metadata
-  if haskey(lensmap, nm)
-    fs = getfield(ctx.metadata, nm)
-    foreach(f -> f(args...), fs)
-  else
-    args
-  end
-end
+"Apply f to args in context of lens"
+function lensapply end
 
-function lensapply(lensmap, f, args...)
-  Cassette.overdub(LensCtx(metadata = lensmap), f, args...)
-end
+# Cassette based implementation
+include("cassette.jl")
+
+# TODO: Normal Julia implementation
+# include("julia.jl")
 
 export lens, lensapply
 
