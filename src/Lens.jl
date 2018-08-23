@@ -12,19 +12,35 @@ Create a named lens
 """
 function lens end
 
-# lens(nm, args...) = nothing
-lens(nm, args::NamedTuple) = args
-lens(nm; kwargs...) = lens(nm, kwargs)
-
 "Apply f to args in context of lens"
 function lensapply end
 
 # Cassette based implementation
-include("cassette.jl")
+# include("cassette.jl")
 
 # TODO: Normal Julia implementation
-# include("julia.jl")
+include("julia.jl")
 
-export lens, lensapply
+"""Function call with lens (shorthand for)
+
+```julia
+f(x) = lens(:mylens, 2x + 1)
+lmap = (mylens = println,)
+@lenscall lmap f(31)
+```
+"""
+macro lenscall(lmap, fcall)
+  fcall.head == :call || error("Must be function application")
+  haskwargs(expr) = expr.args[2] isa Expr && expr.args[2].head == :parameters
+  r = if haskwargs(fcall)
+    Expr(:call, :lenscall, fcall.args[2], lmap, fcall.args[1], fcall.args[3:end]...)
+  else
+    Expr(:call, :lenscall, lmap, fcall.args...)
+  end
+  r
+end
+@spec call.head == :call "Must be function application"
+
+export lens, lenscall, @lenscall
 
 end
