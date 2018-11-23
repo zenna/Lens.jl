@@ -1,7 +1,7 @@
 module Lens
 
-using Compat
 import Base: convert, get, getindex
+import Distributed
 
 export
   Result,

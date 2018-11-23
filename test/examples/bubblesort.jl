@@ -1,6 +1,6 @@
 using Lens
 
-function bubblesort{T}(a::AbstractArray{T,1})
+function bubblesort(a::AbstractVector)
     b = copy(a)
     isordered = false
     span = length(b)

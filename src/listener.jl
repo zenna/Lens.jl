@@ -1,5 +1,5 @@
 # A piece of Data is sent from a lens
-immutable Data
+struct Data
   procid::Int # The process that executed the lens
   lensname::Symbol
   data::Dict{Symbol, Any} # Variable ids, hmm
@@ -9,7 +9,7 @@ getindex(x::Data,i::Symbol) = x.data[i]
 
 # A listener is a named function
 # It has a name so that we can remove it if desired easily
-type Listener
+mutable struct Listener
   name::Symbol
   f::Function
   enabled::Bool

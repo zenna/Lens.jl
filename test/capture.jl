@@ -1,5 +1,6 @@
-using Base.Test
+using Test
 using Lens
+import Distributed
 
 function f()
   x = 10;
@@ -30,7 +31,7 @@ function parbench()
   tot = 0
   lens(:sum,tot)
   for proc in procs()
-    Bref = @spawn (s = sum(rand(1000,1000)^2); lens(:sum,s); s)
+    Bref = Distributed.@spawn (s = sum(rand(1000,1000)^2); lens(:sum,s); s)
     tot += fetch(Bref)
   end
   tot

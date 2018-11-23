@@ -1,12 +1,12 @@
 # global mutable directory connecting benchmark names with dataframes
-typealias Capture @compat Tuple{Symbol, Vector{Symbol}}
+const Capture = Tuple{Symbol, Vector{Symbol}}
 
 # Lensname -> Varname -> Vector of captued values
 clear_captured!() = global captured = Dict{Symbol,Dict{Symbol,Vector{Any}}}()
 clear_captured!()
 
 # Convert a dict into an other one with only those keys in ks
-extract{K,V}(d::Dict{K,V},ks::Vector{K}) = Dict{K,V}(k=>d[k] for k in ks)
+extract(d::Dict{K,V},ks::Vector{K}) where {K,V} = Dict{K,V}(k=>d[k] for k in ks)
 
 # Capture the data and add it to global 'captured'
 function capturebench!(captures::Vector{Symbol}, data::Data)
@@ -43,7 +43,7 @@ function register_captured!(captures::Vector{Capture})
 end
 
 # Register lenses
-function setup!{C<:Capture}(captures::Vector{C})
+function setup!(captures::Vector{C}) where C <: Capture
   clear_captured!()
   register_captured!(captures)
 end
@@ -57,9 +57,9 @@ end
 @doc "Quick and dirty capture:
   Evaluates `f()` and captures any values specified in `captures`.
   Also returns result of `f()`" ->
-function capture{C<:Capture}(f::Function, captures::Vector{C}; exceptions = true)
+function capture(f::Function, captures::Vector{C}; exceptions = true) where C <: Capture
   for proc in procs()
-    fetch(@spawnat proc setup!(captures))
+    fetch(Distributed.@spawnat proc setup!(captures))
   end
 
   local Δt
@@ -86,7 +86,7 @@ function capture{C<:Capture}(f::Function, captures::Vector{C}; exceptions = true
   for proc in procs()
     res.values[proc] = remotecall_fetch(proc, ()->Lens.captured)
   end
-  for proc in procs() @spawnat proc cleanup!() end
+  for proc in procs() Distributed.@spawnat proc cleanup!() end
   value,res
 end
 

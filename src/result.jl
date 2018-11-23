@@ -1,7 +1,7 @@
 @doc """Result of a capture
   Result.val has form:
   Processor id -> (lensname -> (varname -> Vector of values captured at lens)""" ->
-immutable Result
+struct Result
   values::Dict{Int,Dict{Symbol,Dict{Symbol,Vector{Any}}}}
 end
 
@@ -23,4 +23,4 @@ function get(r::Result; proc_id::Int=1, lensname=nothing, capturename=nothing)
   entries[lensname][capturename]
 end
 
-get{T}(@compat r::Tuple{T,Result}) = get(r[2])
+get(r::Tuple{T,Result}) where T = get(r[2])
