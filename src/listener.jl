@@ -32,7 +32,7 @@ function lens(lensname::Symbol; data...)
   listeners = getlisteners(lensname)
   if !isempty(listeners)
     for listener in listeners
-      datum = Data(myid(), lensname, Dict{Symbol, Any}(data))
+      datum = Data(Distributed.myid(), lensname, Dict{Symbol, Any}(data))
       listener.enabled && listener.kwargs && listener.f(datum)
       # When listener does not use kwargs just pass in the values
       listener.enabled && !listener.kwargs && listener.f([d[2] for d in data]...)

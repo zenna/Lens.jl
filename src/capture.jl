@@ -54,11 +54,14 @@ function cleanup!()
   clear_captured!()
 end
 
-@doc "Quick and dirty capture:
-  Evaluates `f()` and captures any values specified in `captures`.
-  Also returns result of `f()`" ->
+"""
+    capture(f::Function, captures::Vector{C}; exceptions = true) where C <: Capture
+Quick and dirty capture:
+gEvaluates `f()` and captures any values specified in `captures`.
+Also returns result of `f()`
+"""
 function capture(f::Function, captures::Vector{C}; exceptions = true) where C <: Capture
-  for proc in procs()
+  for proc in Distributed.procs()
     fetch(Distributed.@spawnat proc setup!(captures))
   end
 
@@ -83,11 +86,11 @@ function capture(f::Function, captures::Vector{C}; exceptions = true) where C <:
 
   # When there are multiple processors, collate all data
   res = Result()
-  for proc in procs()
-    res.values[proc] = remotecall_fetch(proc, ()->Lens.captured)
+  for proc in Distributed.procs()
+    res.values[proc] = Distributed.remotecall_fetch(()->Lens.captured, proc)
   end
-  for proc in procs() Distributed.@spawnat proc cleanup!() end
-  value,res
+  for proc in Distributed.procs() Distributed.@spawnat proc cleanup!() end
+  return value,res
 end
 
 # Hack for failture of type inference to detect [:a, (:a,b)] as Capture vec

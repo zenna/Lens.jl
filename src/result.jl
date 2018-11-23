@@ -1,6 +1,7 @@
-@doc """Result of a capture
+"""Result of a capture
   Result.val has form:
-  Processor id -> (lensname -> (varname -> Vector of values captured at lens)""" ->
+  Processor id -> (lensname -> (varname -> Vector of values captured at lens)
+"""
 struct Result
   values::Dict{Int,Dict{Symbol,Dict{Symbol,Vector{Any}}}}
 end
@@ -11,7 +12,7 @@ convert(::Type{Vector{Result}}, x::Vector{Any}) =
 
 # Convenience functions for extracting data from a Result
 function get(r::Result; proc_id::Int=1, lensname=nothing, capturename=nothing)
-  entries = r.values[proc_id]
+    entries = r.values[proc_id]
   if lensname == nothing
     length(entries) != 1 && error("No lensname specified and more than one lens captured")
     lensname = first(entries)[1]

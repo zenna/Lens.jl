@@ -23,6 +23,8 @@ function bubblesort(a::AbstractVector)
     return b
 end
 
+@testset "bubblesort" begin
+
 register!(println, :print_data, :start_of_loop, false)
 bubblesort([1,2,0,3])
 register!(:start_of_loop, Listener(:print_data, print, true, true))
@@ -44,3 +46,4 @@ end
 
 iters = capture(many_bubbles, [(:after_loop, [:niters])])
 get(iters)
+end
