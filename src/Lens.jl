@@ -1,33 +1,70 @@
+"A lens into the soul of your program"
 module Lens
 
-using Compat
-import Base: convert, get, getindex
+using Cassette
+using Spec
 
-export
-  Result,
-  Listener,
-  Capture,
-  lens,
-  capture,
-  @capture,
-  register_benchmarks!,
-  disable_benchmarks!,
-  disable_benchmarks,
+"""
+Create a named lens
 
-  register!,
-  getlisteners,
-  clear_all_listeners!,
-  enable_all_listeners!,
-  enable_listener!,
-  disable_listener!,
-  disable_all_listeners!,
-  nlisteners,
+```julia
+```
+"""
+function lens end
 
-  getindex
+"Apply f to args in context of lens"
+function lensapply end
 
-include("listener.jl")
-include("result.jl")
-include("capture.jl")
-include("std.jl")
+"Evaluate an expression with a lensmap"
+function leval end
+
+# Cassette based implementation
+# include("cassette.jl")
+
+# TODO: Normal Julia implementation
+include("julia.jl")
+
+"""Function call with lens (shorthand for)
+
+```julia
+f(x) = lens(:mylens, 2x + 1)
+lmap = (mylens = println,)
+@lenscall lmap f(31)
+```
+"""
+macro lenscall(lmap, fcall)
+  fcall.head == :call || error("Must be function application")
+  haskwargs(expr) = expr.args[2] isa Expr && expr.args[2].head == :parameters
+  r = if haskwargs(fcall)
+    Expr(:call, :lenscall, fcall.args[2], lmap, fcall.args[1], fcall.args[3:end]...)
+  else
+    Expr(:call, :lenscall, lmap, fcall.args...)
+  end
+  r
+end
+@spec call.head == :call "Must be function application"
+
+"""
+Lensed eval
+
+```julia
+function g(x, y)
+  lens(:howdy, (x = x, y = y))
+  2x + y
+end
+
+@leval g(1, 2) (howdy = println ∘ sum ∘ values,)
+```
+"""
+macro leval(expr, lmap)
+  quote 
+    setgloballmap!($(esc(lmap)))
+    res = $(esc(expr))
+    resetglobalmap!()
+    res
+  end
+end
+
+export lens, lenscall, @lenscall, @leval
 
 end

@@ -1,17 +1,17 @@
-language: cpp
-compiler:
-  - clang
+language: julia
+dist: trusty
+sudo: true
+os:
+  - linux
+  - osx
+julia:
+  - 1.0
+  - nightly
 notifications:
   email: false
 env:
-  matrix:
-    - JULIAVERSION="juliareleases"
-    - JULIAVERSION="julianightlies"
-before_install:
-  - sudo add-apt-repository ppa:staticfloat/julia-deps -y
-  - sudo add-apt-repository ppa:staticfloat/${JULIAVERSION} -y
-  - sudo apt-get update -qq -y
-  - sudo apt-get install libpcre3-dev julia -y
-  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-script:
-  - julia -e 'Pkg.init(); Pkg.clone(pwd()); Pkg.test("Lens")'
+  - DOCUMENTER_DEBUG="true" CONDA_JL_VERSION="2" PYTHON=""
+matrix:
+  fast_finish: true
+  allow_failures:
+    - julia: nightly
