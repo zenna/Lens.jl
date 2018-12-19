@@ -1,4 +1,6 @@
-tests = ["capture","listener", "examples/bubblesort"]
+using Lens
+using Test
+tests = ["examples/bubblesort"]
 
 println("Running tests:")
 

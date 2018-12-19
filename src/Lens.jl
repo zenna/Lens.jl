@@ -15,6 +15,9 @@ function lens end
 "Apply f to args in context of lens"
 function lensapply end
 
+"Evaluate an expression with a lensmap"
+function leval end
+
 # Cassette based implementation
 # include("cassette.jl")
 
@@ -41,6 +44,27 @@ macro lenscall(lmap, fcall)
 end
 @spec call.head == :call "Must be function application"
 
-export lens, lenscall, @lenscall
+"""
+Lensed eval
+
+```julia
+function g(x, y)
+  lens(:howdy, (x = x, y = y))
+  2x + y
+end
+
+@leval g(1, 2) (howdy = println ∘ sum ∘ values,)
+```
+"""
+macro leval(expr, lmap)
+  quote 
+    setgloballmap!($(esc(lmap)))
+    res = $(esc(expr))
+    resetglobalmap!()
+    res
+  end
+end
+
+export lens, lenscall, @lenscall, @leval
 
 end

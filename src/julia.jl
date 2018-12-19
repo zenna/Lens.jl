@@ -44,6 +44,10 @@ function setgloballmap!(lmap)
 end
 globalmap()::NamedTuple = LMAP.lmap
 
+function resetglobalmap!()
+  setgloballmap!(NamedTuple())
+end
+
 "Lens call f(args...)"
 function lenscall(lmap::NamedTuple, f, args...; kwargs...)
   setgloballmap!(lmap)
