@@ -21,7 +21,7 @@ function Cassette.prehook(ctx::LensCtx, ::typeof(lens), nm::Symbol, args...)
   end
 end
 
-"Lens call f(args...)"
+"Cassette based Lenscall f(args...)"
 function lenscall(lmap::NamedTuple, f, args...; kwargs...)
   f_(args...) = f(args...; kwargs...)
   Cassette.overdub(LensCtx(metadata = lmap), f_, args...)

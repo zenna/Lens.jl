@@ -5,10 +5,7 @@ version = "0.1.0"
 
 [deps]
 Cassette = "7057c7e9-c182-5462-911a-8362d720325c"
-Spec = "526a04b8-654b-11e8-1588-db2a414f95b5"
+Spec = "b8ccf107-3a88-5e0f-823b-b838c6a0f327"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[targets]
-test = ["Test"]

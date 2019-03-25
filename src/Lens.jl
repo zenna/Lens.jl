@@ -19,10 +19,10 @@ function lensapply end
 function leval end
 
 # Cassette based implementation
-# include("cassette.jl")
+include("cassette.jl")
 
 # TODO: Normal Julia implementation
-include("julia.jl")
+# include("julia.jl")
 
 """Function call with lens (shorthand for)
 
