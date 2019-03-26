@@ -1,4 +1,4 @@
-# A lens into the soul of your program
+# A Lens into the Soul of your Program
 
 [![Build Status](https://travis-ci.org/zenna/Lens.jl.svg?branch=master)](https://travis-ci.org/zenna/Lens.jl)
 
