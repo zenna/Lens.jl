@@ -27,6 +27,11 @@ function lenscall(lmap::NamedTuple, f, args...; kwargs...)
   Cassette.overdub(LensCtx(metadata = lmap), f_, args...)
 end
 
+"Cassette based Lenscall f(args...)"
+function lenscallnk(lmap::NamedTuple, f, arg)
+  Cassette.overdub(LensCtx(metadata = lmap), f, arg)
+end
+
 # "Lens call with keyword args"
 # function lenscall(lmap::NamedTuple, f, args...; kwargs...)
 #   f_(args...) = f(args...; kwargs...)
