@@ -19,13 +19,15 @@ Lens is in the official Julia Package repository.  You can easily install it fro
 Suppose we have a function which [bubble sorts](http://en.wikipedia.org/wiki/Bubble_sort) an array:
 
 ```julia
+struct Loop end
+struct LoopEnd end
 function bubblesort(a::AbstractArray{T,1}) where T
   b = copy(a)
   isordered = false
   span = length(b)
   i = 0
   while !isordered && span > 1
-    lens(:start_of_loop, (b = b, i = i)) # <--- lens here!!
+    lens(Loop, (b = b, i = i)) # <--- lens here!!
     isordered = true
     for i in 2:span
       if b[i] < b[i-1]
@@ -38,7 +40,7 @@ function bubblesort(a::AbstractArray{T,1}) where T
     span -= 1
     i += 1
   end
-  lens(:after_loop, (sorteddata = b, niters = i)) # <--- and here!!
+  lens(LoopEnd, (sorteddata = b, niters = i)) # <--- and here!!
   return b
 end
 ```

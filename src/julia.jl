@@ -53,3 +53,24 @@ function lenscall(lmap::NamedTuple, f, args...; kwargs...)
   setgloballmap!(lmap)
   f(args...; kwargs...)
 end
+
+"""
+Lensed eval
+
+```julia
+function g(x, y)
+  lens(:howdy, (x = x, y = y))
+  2x + y
+end
+
+@leval g(1, 2) (howdy = println ∘ sum ∘ values,)
+```
+"""
+macro leval(expr, lmap)
+  quote 
+    setgloballmap!($(esc(lmap)))
+    res = $(esc(expr))
+    resetglobalmap!()
+    res
+  end
+end
