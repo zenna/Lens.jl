@@ -47,10 +47,10 @@ end
 The algorithm details do not matter; what is important is the `lens`.  Lenses are created in the form:
 
 ```julia
-lens(lensname::Symbol, x, y, ...)
+lens(lenslabel, x, y, ...)
 ```
 
-The first argument is a Symbol which gives a name to the lens.  We'll need to remember the name for later when we attach functions to the lens.
+The first argument is a label which gives a name to the lens.  We'll need to remember the name for later when we attach functions to the lens.
 The remaining arguments `x, y,...` are any values you want the lens to capture.
 It is recommended to use keyword `NamedTuples`
 
@@ -64,23 +64,3 @@ lmap = (start_of_loop = ((b, i)) -> , end_of_loop = println)
 ```
 
 The second argument of @leval is a lens map (often abbreivated to `lmap`).  In this simplest form, it is a `NamedTuple` where mapping lens names to funtions.
-
-## Composing Functions
-
-Often we want to execute an expression and attach many functions to a lens.
-
-```julia
-function analgorithm(x)
-  for i = 1:10
-    x = x + i
-    lens(:loopend, (x = x, i = i))
-  end
-end
-
-f1((x, i)) = "Printing x: $x"
-f2((x, i)) = "Printing y: $y"
-@leval analgorithm (endloop = f1 + f2)
-```
-
-In some case, we need more complex compositions.
-For example, we may the output of one 
